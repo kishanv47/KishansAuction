@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Auction Tool v2.1 (Enhanced)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@500;700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            /* Color Palette - Premium Dark Theme */
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --primary: #6366f1;
+            /* Indigo */
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --accent: #06b6d4;
+            /* Cyan */
+            --success: #10b981;
+            /* Emerald */
+            --danger: #ef4444;
+            /* Red */
+            --warning: #f59e0b;
+            /* Amber */
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+
+            --glass: rgba(30, 41, 59, 0.7);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes hammerRotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            30% {
+                transform: rotate(-45deg);
+            }
+
+            50% {
+                transform: rotate(0deg);
+            }
+
+            70% {
+                transform: rotate(-45deg);
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
+        }
+
+        @keyframes hammerPound {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .animate-hammer {
+            animation: hammerRotate 0.8s ease-in-out;
+        }
+
+        /* --- Layout --- */
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            flex: 1;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-icon {
+            font-size: 2.5rem;
+        }
+
+        .brand-text h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text-main), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- Navigation --- */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            background: var(--bg-card);
+            padding: 5px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .nav-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        /* --- Components --- */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #1e293b;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* --- Auction Arena --- */
+        .auction-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            height: calc(100vh - 160px);
+        }
+
+        .player-card-large {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .player-photo-lg {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--primary);
+            margin-bottom: 24px;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .player-name-lg {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .player-role-badge {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .player-placeholder-lg {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--bg-dark), var(--bg-card));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            color: var(--text-muted);
+            border: 2px dashed var(--border);
+            margin-bottom: 24px;
+        }
+
+        .bid-controls {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .bid-btn {
+            padding: 10px;
+            border-radius: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .bid-btn:hover {
+            border-color: var(--accent);
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .team-bid-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            text-align: left;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .team-bid-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .team-bid-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .team-bid-btn.active-bidder {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white !important;
+        }
+
+        .current-bid-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        #currentBidAmt {
+            font-size: 4.5rem;
+            font-weight: 900;
+            line-height: 1;
+            margin: 10px 0;
+        }
+
+        #currentBidTeam {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Tables & Lists --- */
+        .table-container {
+            overflow-x: auto;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-sold {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        /* --- Teams Tab --- */
+        .team-detail-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .team-detail-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .team-players-list {
+            padding: 20px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .team-player-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* --- Dashboard w/ Logos (Compact) --- */
+        #dashTeamList {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .dash-team-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .dash-team-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .dash-team-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .dash-stats-grid {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .dash-stat-item {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: block;
+        }
+
+        .dash-stat-val {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* --- Modal --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+        }
+
+        .hammer-icon {
+            font-size: 8rem;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .sold-text {
+            font-size: 5rem;
+            font-weight: 900;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="brand">
+                <div class="brand-icon">🏏</div>
+                <div class="brand-text">
+                    <h1>Auction Master v2.1</h1>
+                    <p>Ultimate Player Auction System</p>
+                </div>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-btn active" onclick="app.switchTab('setup')">⚙️ Setup</button>
+                <button class="nav-btn" onclick="app.switchTab('auction')">🔨 Auction Arena</button>
+                <button class="nav-btn" onclick="app.switchTab('teams')">👥 Teams & Squads</button>
+                <button class="nav-btn" onclick="app.switchTab('dashboard')">📊 Dashboard</button>
+                <button class="nav-btn" onclick="app.switchTab('players')">🏃 Players List</button>
+            </nav>
+        </header>
+
+        <!-- SETUP TAB -->
+        <section id="setup" class="view-section active">
+            <div class="grid-2">
+                <!-- Auction Settings -->
+                <div class="card">
+                    <h2 class="form-label" style="font-size: 1.2rem; margin-bottom: 15px;">Auction Rules & Sets</h2>
+                    <div class="form-group"
+                        style="display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                        <input type="checkbox" id="setsEnabled" onchange="app.saveSettings()"
+                            style="width: 20px; height: 20px;">
+                        <label for="setsEnabled" style="margin: 0; cursor: pointer;">Enable Category-wise Auction
+                            (Sets)</label>
+                    </div>
+
+                    <div id="setsConfig"
+                        style="display: none; padding-left: 10px; border-left: 2px solid var(--primary); margin-top: 10px;">
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Set 1 Role</label>
+                                <select id="set1Role" class="form-control" onchange="app.saveSettings()">
+                                    <option value="Batsman">Batsman</option>
+                                    <option value="Bowler">Bowler</option>
+                                    <option value="All-Rounder">All-Rounder</option>
+                                    <option value="Wicket-Keeper">Wicket-Keeper</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Set 2 Role</label>
+                                <select id="set2Role" class="form-control" onchange="app.saveSettings()">
+                                    <option value="Bowler">Bowler</option>
+                                    <option value="Batsman">Batsman</option>
+                                    <option value="All-Rounder">All-Rounder</option>
+                                    <option value="Wicket-Keeper">Wicket-Keeper</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Set 3 Role</label>
+                                <select id="set3Role" class="form-control" onchange="app.saveSettings()">
+                                    <option value="All-Rounder">All-Rounder</option>
+                                    <option value="Batsman">Batsman</option>
+                                    <option value="Bowler">Bowler</option>
+                                    <option value="Wicket-Keeper">Wicket-Keeper</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Set 4 Role</label>
+                                <select id="set4Role" class="form-control" onchange="app.saveSettings()">
+                                    <option value="Wicket-Keeper">Wicket-Keeper</option>
+                                    <option value="Batsman">Batsman</option>
+                                    <option value="Bowler">Bowler</option>
+                                    <option value="All-Rounder">All-Rounder</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="form-label" style="font-size: 1.2rem; margin: 25px 0 15px;">Data & Import</h2>
+                    <div class="grid-2">
+                        <button class="btn btn-outline" onclick="document.getElementById('excelInput').click()">📤
+                            Import Excel</button>
+                        <input type="file" id="excelInput" hidden accept=".xlsx, .xls" onchange="app.importExcel(this)">
+                        <button class="btn btn-outline" onclick="app.exportExcel()">📥 Export Teams Excel</button>
+                        <button class="btn btn-outline" style="color: var(--warning); border-color: var(--warning);"
+                            onclick="app.reviveUnsold()">♻️ Revive Unsold Players</button>
+                        <button class="btn btn-outline" onclick="document.getElementById('jsonInput').click()">📂 Load
+                            Test Data (JSON)</button>
+                        <input type="file" id="jsonInput" hidden accept=".json" onchange="app.importJSON(this)">
+                        <button class="btn btn-outline"
+                            style="color: var(--accent); border-color: var(--accent); grid-column: span 2;"
+                            onclick="app.generateSampleExcel()">📊 Create Sample Import File (Excel)</button>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted);">
+                        * Excel must have sheets "Teams" (Name, Budget, Logo) and "Players" (Name, Role, BasePrice,
+                        Image).
+                    </div>
+                </div>
+
+                <!-- Manual Add -->
+                <div class="card">
+                    <h2 class="form-label" style="font-size: 1.2rem; margin-bottom: 20px;">Manual Entry</h2>
+                    <div class="form-group">
+                        <label class="form-label">Add Team</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="setupTeamName" class="form-control" placeholder="Name">
+                            <input type="number" id="setupTeamBudget" class="form-control" placeholder="Budget (L)"
+                                style="width: 100px;">
+                            <button class="btn btn-primary" onclick="app.addTeam()">Add</button>
+                        </div>
+                    </div>
+                    <hr style="border-color: var(--border); margin: 20px 0;">
+                    <div class="form-group">
+                        <label class="form-label">Add Player</label>
+                        <input type="text" id="setupPlayerName" class="form-control" placeholder="Name">
+                        <div class="grid-2" style="margin-top: 10px;">
+                            <select id="setupPlayerRole" class="form-control">
+                                <option>Batsman</option>
+                                <option>Bowler</option>
+                                <option>All-Rounder</option>
+                                <option>Wicket-Keeper</option>
+                            </select>
+                            <input type="number" id="setupPlayerPrice" class="form-control" placeholder="Base Price">
+                        </div>
+                        <div class="form-group" style="margin-top: 10px;">
+                            <input type="text" id="setupPlayerImg" class="form-control"
+                                placeholder="Image URL (Optional)">
+                        </div>
+                        <button class="btn btn-success btn-block" onclick="app.addPlayer()">Add Player</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AUCTION TAB -->
+        <section id="auction" class="view-section">
+            <div id="auctionStartOverlay" style="text-align: center; padding: 100px;">
+                <h2 style="font-size: 2rem; margin-bottom: 20px;">Ready to Start?</h2>
+                <div id="setInfoDisplay" style="margin-bottom: 20px; color: var(--accent);">Sets Mode: Disabled</div>
+                <button class="btn btn-primary" style="font-size: 1.2rem; padding: 15px 40px;"
+                    onclick="app.startAuction()">Start Auction</button>
+            </div>
+
+            <div id="auctionInterface" class="auction-layout" style="display: none;">
+                <!-- Left: Player Info -->
+                <div class="player-area">
+                    <div class="player-card-large">
+                        <div id="aucPlayerImgContainer">
+                            <!-- Helper will inject img or placeholder here -->
+                        </div>
+                        <h2 class="player-name-lg" id="aucPlayerName">-</h2>
+                        <div class="player-role-badge" id="aucPlayerRole"
+                            style="background: rgba(99,102,241,0.1); color: var(--primary); padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-bottom: 15px;">
+                            -</div>
+
+                        <div
+                            style="width: 100%; border-top: 1px solid var(--border); padding-top: 20px; margin-top: auto;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span style="color: var(--text-muted);">Base Price</span>
+                                <span style="font-weight: 700; color: var(--text-main);" id="aucBasePrice">-</span>
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                                <button class="btn btn-outline btn-sm" onclick="app.skipPlayer()">Skip</button>
+                                <button class="btn btn-outline btn-sm"
+                                    style="color: var(--danger); border-color: var(--danger);"
+                                    onclick="app.unsoldPlayer()">Unsold</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Bidding Controls -->
+                <div class="bid-display-area" style="display: flex; flex-direction: column; gap: 20px;">
+                    <!-- Current Bid Status -->
+                    <div class="current-bid-card"
+                        style="background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.1)); border: 1px solid rgba(16,185,129,0.3); border-radius: 20px; padding: 25px; text-align: center;">
+                        <div
+                            style="font-size: 0.9rem; text-transform: uppercase; color: var(--success); font-weight: 700;">
+                            Current Bid</div>
+                        <div id="currentBidAmt"
+                            style="font-size: 4.5rem; font-weight: 900; line-height: 1; margin: 10px 0;">0L</div>
+                        <div id="currentBidTeam" style="font-size: 1.2rem; color: var(--text-muted);">No bids yet</div>
+                    </div>
+
+                    <!-- Bid Increments Settings -->
+                    <div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <label class="form-label" style="font-size: 0.85rem; margin: 0;">Set Auto-Bid Increment
+                                (Lakhs)</label>
+                        </div>
+                        <div class="bid-controls">
+                            <button class="bid-btn" id="btnStep1" onclick="app.setBidStep(1)">1L</button>
+                            <button class="bid-btn" id="btnStep5" onclick="app.setBidStep(5)">5L</button>
+                            <button class="bid-btn" id="btnStep10" onclick="app.setBidStep(10)">10L</button>
+                            <button class="bid-btn" id="btnStep20" onclick="app.setBidStep(20)">20L</button>
+                            <button class="bid-btn" id="btnStep25" onclick="app.setBidStep(25)">25L</button>
+                            <button class="bid-btn" id="btnStep50" onclick="app.setBidStep(50)">50L</button>
+                        </div>
+                    </div>
+
+                    <!-- Teams Grid -->
+                    <h3 class="form-label">Active Bidders</h3>
+                    <div class="team-grid" id="auctionTeamGrid"></div>
+
+                    <!-- Sell Button -->
+                    <button class="btn btn-success btn-block"
+                        style="padding: 20px; font-size: 1.3rem; margin-top: auto;" onclick="app.sellPlayer()">
+                        🔨 SOLD
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TEAMS TAB -->
+        <section id="teams" class="view-section">
+            <h2 class="form-label" style="font-size: 1.5rem; margin-bottom: 20px;">Team Squads</h2>
+            <div class="grid-3" id="teamsFullGrid">
+                <!-- Detailed team cards go here -->
+            </div>
+        </section>
+
+        <!-- DASHBOARD TAB -->
+        <section id="dashboard" class="view-section">
+            <div class="grid-4" style="margin-bottom: 30px;">
+                <div class="stat-card card">
+                    <div class="stat-val" id="dashTeams">0</div>
+                    <div style="color:var(--text-muted)">Teams</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-val" id="dashSold">0</div>
+                    <div style="color:var(--text-muted)">Sold</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-val" id="dashSpent" style="color:var(--success)">0L</div>
+                    <div style="color:var(--text-muted)">Spent</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-val" id="dashUnsold" style="color:var(--warning)">0</div>
+                    <div style="color:var(--text-muted)">Unsold</div>
+                </div>
+            </div>
+            <div class="grid-3" id="dashTeamList"></div>
+        </section>
+
+        <!-- PLAYERS TAB -->
+        <section id="players" class="view-section">
+            <h2 class="form-label" style="font-size: 1.5rem; margin-bottom: 20px;">Player Database</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Base</th>
+                            <th>Status</th>
+                            <th>Sold To</th>
+                            <th>Price</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="playerTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- SOLD OVERLAY -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="hammer-icon" id="hammerIcon">🔨</div>
+            <div class="sold-text" style="font-size: 5rem; font-weight: 900; color: white;">SOLD!</div>
+            <div id="soldDetailText" style="font-size: 2.5rem; color: var(--warning); margin: 20px 0;">Player</div>
+            <div style="font-size: 1.5rem; color: white;">to <span id="soldTeamText"
+                    style="color: var(--accent); font-weight: bold;">Team</span></div>
+            <div style="font-size: 1.5rem; color: white;">for <span id="soldPriceText"
+                    style="color: var(--success); font-weight: bold;">Price</span></div>
+            <button class="btn btn-primary" style="margin-top: 40px;" onclick="app.closeModal()">Next Player ➔</button>
+        </div>
+    </div>
+
+    <!-- Hidden Image Uploader -->
+    <input type="file" id="playerImgUpload" hidden accept="image/*" onchange="app.handleImageUpload(this)">
+
+    <script>
+        const app = {
+            data: {
+                teams: [],
+                players: [],
+                settings: {
+                    setsEnabled: false,
+                    sets: { 1: 'Batsman', 2: 'Bowler', 3: 'All-Rounder', 4: 'Wicket-Keeper' }
+                },
+                state: {
+                    currentSetIndex: 1,
+                    currentItem: null,
+                    currentBid: 0,
+                    currentBidder: null,
+                    bidStep: 20, // Default increment
+                    auctionStarted: false
+                }
+            },
+
+            init() {
+                const saved = localStorage.getItem('auction_v2_data');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    this.data = { ...this.data, ...parsed };
+
+                    // ONE-TIME FIX: Remove duplicate teams
+                    const uniqueTeams = [];
+                    const seenNames = new Set();
+                    this.data.teams.forEach(t => {
+                        const n = t.name.trim().toLowerCase();
+                        if (!seenNames.has(n)) {
+                            seenNames.add(n);
+                            uniqueTeams.push(t);
+                        } else {
+                            // Merge bug fix: ensure the survivor has players if the duplicate does? 
+                            // Actually, let's keep the one that has players or lower remaining budget (most active)
+                            const existing = uniqueTeams.find(ut => ut.name.trim().toLowerCase() === n);
+                            if (t.players.length > existing.players.length || t.remaining < existing.remaining) {
+                                // Replace the existing inactive one with this active one
+                                uniqueTeams[uniqueTeams.indexOf(existing)] = t;
+                            }
+                        }
+                    });
+                    this.data.teams = uniqueTeams;
+                    this.save(); // Save cleaned data
+
+                    if (!this.data.settings) this.data.settings = { setsEnabled: false, sets: { 1: 'Batsman', 2: 'Bowler', 3: 'All-Rounder', 4: 'Wicket-Keeper' } };
+                }
+
+                // UI Init
+                document.getElementById('setsEnabled').checked = this.data.settings.setsEnabled;
+                document.getElementById('setsConfig').style.display = this.data.settings.setsEnabled ? 'block' : 'none';
+
+                // Set selectors init
+                for (let i = 1; i <= 4; i++) {
+                    const sel = document.getElementById(`set${i}Role`);
+                    if (sel) sel.value = this.data.settings.sets[i];
+                }
+
+                this.updateUI();
+
+                // Set default bid step UI
+                this.setBidStep(this.data.state.bidStep || 20);
+            },
+
+            triggerImageUpload(pId) {
+                this.uploadingPlayerId = pId;
+                document.getElementById('playerImgUpload').click();
+            },
+
+            handleImageUpload(input) {
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const base64 = e.target.result;
+                        // Basic check to avoid massive files crashing localStorage
+                        if (base64.length > 500000) {
+                            if (!confirm("Large image detected (>0.5MB). This might fill up storage. Continue?")) return;
+                        }
+
+                        const p = this.data.players.find(x => x.id === this.uploadingPlayerId);
+                        if (p) {
+                            p.img = base64;
+                            this.save();
+                            this.renderPlayerTable();
+                            alert("Image Updated!");
+                        }
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+                input.value = ''; // Reset
+            },
+
+            save() {
+                try {
+                    localStorage.setItem('auction_v2_data', JSON.stringify(this.data));
+                } catch (e) { alert("Storage Full! Cannot save image."); }
+            },
+
+            saveSettings() {
+                this.data.settings.setsEnabled = document.getElementById('setsEnabled').checked;
+                document.getElementById('setsConfig').style.display = this.data.settings.setsEnabled ? 'block' : 'none';
+
+                for (let i = 1; i <= 4; i++) {
+                    const val = document.getElementById(`set${i}Role`).value;
+                    this.data.settings.sets[i] = val;
+                }
+
+                document.getElementById('setInfoDisplay').innerText = this.data.settings.setsEnabled
+                    ? `Sets Mode: Enabled (Starting Set 1: ${this.data.settings.sets[1]})`
+                    : "Sets Mode: Disabled (Random Order)";
+
+                this.save();
+            },
+
+            switchTab(id) {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                const btn = document.querySelector(`.nav-btn[onclick*="${id}"]`);
+                if (btn) btn.classList.add('active');
+
+                document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+
+                if (id === 'teams') { this.deduplicateTeams(); this.renderTeamsTab(); }
+                if (id === 'dashboard') { this.deduplicateTeams(); this.renderDashboard(); }
+                if (id === 'players') this.renderPlayerTable();
+            },
+
+            deduplicateTeams() {
+                const uniqueTeams = [];
+                const seenNames = new Set();
+                let changed = false;
+
+                this.data.teams.forEach(t => {
+                    const n = t.name.trim().toLowerCase();
+                    if (!seenNames.has(n)) {
+                        seenNames.add(n);
+                        uniqueTeams.push(t);
+                    } else {
+                        // Merge logic: keep the one with activity
+                        const existing = uniqueTeams.find(ut => ut.name.trim().toLowerCase() === n);
+                        if (t.players.length > existing.players.length || t.remaining < existing.remaining) {
+                            uniqueTeams[uniqueTeams.indexOf(existing)] = t;
+                        }
+                        changed = true;
+                    }
+                });
+
+                if (changed) {
+                    this.data.teams = uniqueTeams;
+                    this.save();
+                    console.log("Teams deduplicated!");
+                }
+            },
+
+            // --- DATA MANAGMENT ---
+            addTeam(name, budget, logo) {
+                const n = name || document.getElementById('setupTeamName').value;
+                const b = budget || Number(document.getElementById('setupTeamBudget').value);
+                const l = logo || null;
+
+                if (!n || b <= 0) return alert("Invalid Team");
+
+                // Prevent Duplicates
+                if (this.data.teams.some(t => t.name.toLowerCase() === n.trim().toLowerCase())) {
+                    if (!name) alert("Team already exists!");
+                    return;
+                }
+
+                this.data.teams.push({ id: Date.now() + Math.random(), name: n, budget: b, remaining: b, logo: l, players: [], playerCount: 0 });
+                if (!name) { document.getElementById('setupTeamName').value = ''; alert('Team Added'); } // only alert if manual
+                this.save();
+            },
+
+            addPlayer(name, role, price, img) {
+                const n = name || document.getElementById('setupPlayerName').value;
+                const r = role || document.getElementById('setupPlayerRole').value;
+                const p = price || Number(document.getElementById('setupPlayerPrice').value);
+                const i = img || document.getElementById('setupPlayerImg').value; // Get image
+
+                if (!n) return alert("Invalid Player");
+
+                this.data.players.push({
+                    id: Date.now() + Math.random(),
+                    name: n, role: r, basePrice: p, img: i,
+                    status: 'pending', soldTo: null, soldPrice: 0
+                });
+
+                if (!name) {
+                    document.getElementById('setupPlayerName').value = '';
+                    document.getElementById('setupPlayerImg').value = '';
+                    alert('Player Added');
+                }
+                this.save();
+            },
+
+            // --- AUCTION ---
+            startAuction() {
+                if (this.data.teams.length === 0) return alert("No teams!");
+                document.getElementById('auctionStartOverlay').style.display = 'none';
+                document.getElementById('auctionInterface').style.display = 'grid';
+                this.data.state.currentSetIndex = 1;
+                this.nextPlayer();
+            },
+
+            nextPlayer() {
+                let pending = this.data.players.filter(p => p.status === 'pending');
+
+                // Sets Logic
+                if (this.data.settings.setsEnabled) {
+                    let setRole = this.data.settings.sets[this.data.state.currentSetIndex];
+                    let setPlayers = pending.filter(p => p.role === setRole);
+
+                    // If no players in this set, move to next
+                    while (setPlayers.length === 0 && this.data.state.currentSetIndex < 4) {
+                        this.data.state.currentSetIndex++;
+                        setRole = this.data.settings.sets[this.data.state.currentSetIndex];
+                        setPlayers = pending.filter(p => p.role === setRole);
+                    }
+
+                    // If still no players (finished all sets), check leftovers or finish
+                    if (setPlayers.length === 0) {
+                        // Check if any pending players with OTHER roles remain (misclassified or extras)
+                        if (pending.length > 0) {
+                            if (confirm("All sets finished! Process remaining players?")) {
+                                // Fallback to random for remainder
+                            } else {
+                                return alert("Auction Completed!");
+                            }
+                        } else {
+                            return alert("Auction Completed! All players sold.");
+                        }
+                    } else {
+                        pending = setPlayers; // Restrict pool to this set
+                    }
+                }
+
+                if (pending.length === 0) return alert("No more players!");
+
+                // Randomize Selection
+                const randomIndex = Math.floor(Math.random() * pending.length);
+                const player = pending[randomIndex];
+                this.data.state.currentItem = player;
+                this.data.state.currentBid = player.basePrice;
+                this.data.state.currentBidder = null;
+
+                this.renderAuctionUI();
+            },
+
+            reviveUnsold() {
+                const count = this.data.players.filter(p => p.status === 'unsold').length;
+                if (count === 0) return alert("No unsold players to revive!");
+
+                if (confirm(`Bring back ${count} unsold players to the auction pool?`)) {
+                    this.data.players.forEach(p => {
+                        if (p.status === 'unsold') p.status = 'pending';
+                    });
+                    this.save();
+                    alert(`${count} players returned to pending pool!`);
+                    // If we were stuck/finished, try to restart flow
+                    if (!this.data.state.currentItem) this.nextPlayer();
+                }
+            },
+
+            renderAuctionUI() {
+                const p = this.data.state.currentItem;
+                document.getElementById('aucPlayerName').innerText = p.name;
+                document.getElementById('aucPlayerRole').innerText = p.role;
+                document.getElementById('aucBasePrice').innerText = p.basePrice + "L";
+
+                const imgContainer = document.getElementById('aucPlayerImgContainer');
+                if (p.img) {
+                    imgContainer.innerHTML = `<img src="${p.img}" class="player-photo-lg" alt="${p.name}">`;
+                } else {
+                    imgContainer.innerHTML = `<div class="player-placeholder-lg">${p.name.charAt(0)}</div>`;
+                }
+
+                this.updateBidBoard();
+                this.renderAuctionTeams();
+            },
+
+            renderAuctionTeams() {
+                const grid = document.getElementById('auctionTeamGrid');
+                grid.innerHTML = this.data.teams.map(t => {
+                    const isLeader = this.data.state.currentBidder === t.id;
+                    const canAfford = t.remaining >= this.data.state.currentBid;
+                    return `
+                        <button class="team-bid-btn ${isLeader ? 'active-bidder' : ''}" onclick="app.placeBid(${t.id})" ${!canAfford ? 'disabled' : ''}>
+                             <div style="font-weight:700">${t.name}</div>
+                             <div style="font-size:0.8rem">Rem: ${t.remaining}L</div>
+                             <div style="font-size:0.8rem">Squad: ${t.playerCount}</div>
+                        </button>
+                    `;
+                }).join('');
+            },
+
+            updateBidBoard() {
+                document.getElementById('currentBidAmt').innerText = this.data.state.currentBid + "L";
+                const leader = this.data.teams.find(t => t.id === this.data.state.currentBidder);
+                document.getElementById('currentBidTeam').innerText = leader ? `Winning: ${leader.name}` : "Waiting for bid...";
+                document.getElementById('currentBidTeam').style.color = leader ? 'var(--success)' : 'var(--text-muted)';
+            },
+
+            setBidStep(step) {
+                this.data.state.bidStep = step;
+                // Update UI active state
+                document.querySelectorAll('.bid-btn').forEach(b => {
+                    b.style.background = 'var(--bg-card)';
+                    b.style.color = 'var(--text-main)';
+                    b.style.borderColor = 'var(--border)';
+                });
+                const activeBtn = document.getElementById(`btnStep${step}`);
+                if (activeBtn) {
+                    activeBtn.style.background = 'var(--primary)';
+                    activeBtn.style.color = 'white';
+                    activeBtn.style.borderColor = 'var(--primary)';
+                }
+            },
+
+            placeBid(teamId) {
+                const team = this.data.teams.find(t => t.id === teamId);
+                let newBid = this.data.state.currentBid;
+
+                // If someone holds the bid, clicking another team implies raising it by step
+                if (this.data.state.currentBidder) {
+                    newBid += this.data.state.bidStep;
+                }
+
+                if (team.remaining < newBid) return alert("Low Budget!");
+
+                this.data.state.currentBid = newBid;
+                this.data.state.currentBidder = teamId;
+                this.updateBidBoard();
+                this.renderAuctionTeams();
+            },
+
+            sellPlayer() {
+                if (!this.data.state.currentBidder) return alert("No Bidder!");
+
+                const p = this.data.state.currentItem;
+                const t = this.data.teams.find(team => team.id === this.data.state.currentBidder);
+
+                p.status = 'sold';
+                p.soldTo = t.name;
+                p.soldPrice = this.data.state.currentBid;
+
+                t.players.push(p.id);
+                t.playerCount++;
+                t.remaining -= p.soldPrice;
+
+                this.save();
+                this.showSoldOverlay(p.name, t.name, p.soldPrice);
+            },
+
+            skipPlayer() {
+                // Move current item to end of array to cycle it
+                const p = this.data.state.currentItem;
+                // Remove form index
+                const idx = this.data.players.findIndex(x => x.id === p.id);
+                this.data.players.splice(idx, 1);
+                this.data.players.push(p); // Add to end
+                this.save();
+                this.nextPlayer();
+            },
+
+            unsoldPlayer() {
+                const p = this.data.state.currentItem;
+                p.status = 'unsold';
+                this.save();
+                this.nextPlayer();
+            },
+
+            // --- ANIMATION & MODAL ---
+            showSoldOverlay(pName, tName, price) {
+                const modal = document.getElementById('modalOverlay');
+                const hammer = document.getElementById('hammerIcon');
+
+                document.getElementById('soldDetailText').innerText = pName;
+                document.getElementById('soldTeamText').innerText = tName;
+                document.getElementById('soldPriceText').innerText = price + "L";
+
+                modal.style.display = 'flex';
+                hammer.classList.add('animate-hammer');
+
+                // Trigger Confetti
+                if (window.confetti) {
+                    var duration = 3000;
+                    var end = Date.now() + duration;
+                    (function frame() {
+                        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#6366f1', '#06b6d4', '#10b981'] });
+                        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#6366f1', '#06b6d4', '#10b981'] });
+                        if (Date.now() < end) requestAnimationFrame(frame);
+                    }());
+                }
+
+                // Voice Over
+                if ('speechSynthesis' in window) {
+                    const text = `Sold! ${pName} to ${tName} for ${price} Lakhs`;
+                    const utt = new SpeechSynthesisUtterance(text);
+                    utt.rate = 1.1;
+                    window.speechSynthesis.speak(utt);
+                }
+
+                // Remove animation class after it runs so it can run again
+                setTimeout(() => hammer.classList.remove('animate-hammer'), 1000);
+            },
+
+            closeModal() {
+                document.getElementById('modalOverlay').style.display = 'none';
+                this.nextPlayer();
+            },
+
+            // --- EXCEL ---
+            exportExcel() {
+                const pSheet = XLSX.utils.json_to_sheet(this.data.players);
+                const tSheet = XLSX.utils.json_to_sheet(this.data.teams);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, tSheet, "Teams");
+                XLSX.utils.book_append_sheet(wb, pSheet, "Players");
+                XLSX.writeFile(wb, "action_data.xlsx");
+            },
+
+            importExcel(input) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    // Reset Data on Import to prevent duplicates
+                    this.data.teams = [];
+                    this.data.players = [];
+
+                    // Teams
+                    if (workbook.Sheets['Teams']) {
+                        const tData = XLSX.utils.sheet_to_json(workbook.Sheets['Teams']);
+                        tData.forEach(r => {
+                            // Map Excel columns to our format
+                            this.addTeam(r.Name || r.TeamName, r.Budget, r.Logo || r.LogoURL);
+                        });
+                    }
+
+                    // Players
+                    if (workbook.Sheets['Players']) {
+                        const pData = XLSX.utils.sheet_to_json(workbook.Sheets['Players']);
+                        pData.forEach(r => {
+                            this.addPlayer(r.Name || r.PlayerName, r.Role, r.BasePrice || r.Price, r.Image || r.ImageURL || r.ProfilePicture);
+                        });
+                    }
+                    alert("Import Complete!");
+                    this.updateUI();
+                };
+                reader.readAsArrayBuffer(file);
+            },
+
+            importJSON(input) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (data.teams) this.data.teams = data.teams;
+                        if (data.players) this.data.players = data.players;
+                        if (data.settings) this.data.settings = data.settings;
+
+                        this.save();
+                        this.updateUI();
+                        alert("Data Loaded Successfully!");
+                    } catch (err) {
+                        alert("Invalid JSON File");
+                    }
+                };
+                reader.readAsText(file);
+            },
+
+            generateSampleExcel() {
+                // Sample Data
+                const teams = [
+                    { Name: "Royal Challengers", Budget: 1000, Logo: "https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/Royal_Challengers_Bangalore_2020.svg/1200px-Royal_Challengers_Bangalore_2020.svg.png" },
+                    { Name: "Chennai Super Kings", Budget: 1000, Logo: "https://upload.wikimedia.org/wikipedia/en/thumb/2/2b/Chennai_Super_Kings_Logo.svg/1200px-Chennai_Super_Kings_Logo.svg.png" },
+                    { Name: "Mumbai Indians", Budget: 1000, Logo: "https://upload.wikimedia.org/wikipedia/en/thumb/c/cd/Mumbai_Indians_Logo.svg/1200px-Mumbai_Indians_Logo.svg.png" },
+                    { Name: "Kolkata Knight Riders", Budget: 1000, Logo: "https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Kolkata_Knight_Riders_Logo.svg/1200px-Kolkata_Knight_Riders_Logo.svg.png" }
+                ];
+
+                const players = [
+                    { Name: "Virat Kohli", Role: "Batsman", BasePrice: 200, Image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Virat" },
+                    { Name: "Rohit Sharma", Role: "Batsman", BasePrice: 200, Image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rohit" },
+                    { Name: "MS Dhoni", Role: "Wicket-Keeper", BasePrice: 200, Image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Dhoni" },
+                    { Name: "Jasprit Bumrah", Role: "Bowler", BasePrice: 200, Image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bumrah" },
+                    { Name: "Hardik Pandya", Role: "All-Rounder", BasePrice: 150, Image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Hardik" },
+                    { Name: "Ravindra Jadeja", Role: "All-Rounder", BasePrice: 150, Image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jadeja" },
+                    { Name: "KL Rahul", Role: "Wicket-Keeper", BasePrice: 150, Image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul" },
+                    { Name: "Shubman Gill", Role: "Batsman", BasePrice: 100, Image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Gill" },
+                    { Name: "Mohammed Shami", Role: "Bowler", BasePrice: 100, Image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Shami" },
+                    { Name: "Rishabh Pant", Role: "Wicket-Keeper", BasePrice: 100, Image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Pant" },
+                    // Added 40 more placeholders to reach 50
+                    ...Array.from({ length: 40 }, (_, i) => ({
+                        Name: `Player ${i + 11}`,
+                        Role: ["Batsman", "Bowler", "All-Rounder", "Wicket-Keeper"][i % 4],
+                        BasePrice: 20 + (i % 5) * 10,
+                        Image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 11}`
+                    }))
+                ];
+
+                const wb = XLSX.utils.book_new();
+                const tSheet = XLSX.utils.json_to_sheet(teams);
+                const pSheet = XLSX.utils.json_to_sheet(players);
+
+                XLSX.utils.book_append_sheet(wb, tSheet, "Teams");
+                XLSX.utils.book_append_sheet(wb, pSheet, "Players");
+
+                XLSX.writeFile(wb, "Sample_Auction_Data.xlsx");
+            },
+
+            // --- VIEWS ---
+            renderTeamsTab() {
+                const container = document.getElementById('teamsFullGrid');
+                container.innerHTML = this.data.teams.map(t => {
+                    // Resolve player objects
+                    const teamPlayers = this.data.players.filter(p => p.soldTo === t.name); // Using name match safely or id if possible. 
+                    // Better to use ID matching but soldTo is easy for display.
+
+                    return `
+                        <div class="team-detail-card">
+                            <div class="team-detail-header">
+                                <div>
+                                    <h3 style="font-size: 1.2rem;">${t.name}</h3>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">${teamPlayers.length} Players</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: var(--success); font-weight: bold;">${t.remaining}L</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Remaining</div>
+                                </div>
+                            </div>
+                            <div class="team-players-list">
+                                ${teamPlayers.length ? teamPlayers.map(p => `
+                                    <div class="team-player-row">
+                                        <span>${p.name} (${p.role.charAt(0)})</span>
+                                        <span style="color: var(--success);">${p.soldPrice}L</span>
+                                    </div>
+                                `).join('') : '<div style="text-align:center; color:var(--text-muted); font-size:0.8rem;">No players yet</div>'}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            renderDashboard() {
+                document.getElementById('dashTeams').innerText = this.data.teams.length;
+                document.getElementById('dashSold').innerText = this.data.players.filter(p => p.status === 'sold').length;
+
+                let spent = 0;
+                this.data.teams.forEach(t => spent += (t.budget - t.remaining));
+                document.getElementById('dashSpent').innerText = spent + "L";
+                document.getElementById('dashUnsold').innerText = this.data.players.filter(p => p.status === 'unsold').length;
+
+                const list = document.getElementById('dashTeamList');
+                list.innerHTML = this.data.teams.map(t => `
+                    <div class="card dash-team-card">
+                        ${t.logo ? `<img src="${t.logo}" class="dash-team-logo" alt="logo">` : '<div class="dash-team-logo" style="display:flex;align-items:center;justify-content:center;font-size:3rem;background:rgba(255,255,255,0.1);border-radius:50%;">🏏</div>'}
+                        
+                        <h4 class="dash-team-name">${t.name}</h4>
+                        <div class="progress-bar" style="width:100%; height:10px; background:rgba(255,255,255,0.1); margin-bottom:10px;">
+                            <div class="progress-fill" style="width:${((t.budget - t.remaining) / t.budget) * 100}%; background:var(--primary); box-shadow:0 0 10px var(--primary-glow);"></div>
+                        </div>
+                        
+                        <div class="dash-stats-grid">
+                            <div><span class="dash-stat-item">Purse Left</span><span class="dash-stat-val" style="color:var(--success)">${t.remaining}L</span></div>
+                            <div><span class="dash-stat-item">Squad Size</span><span class="dash-stat-val">${t.playerCount}</span></div>
+                        </div>
+                    </div>
+                 `).join('');
+            },
+
+            renderPlayerTable() {
+                document.getElementById('playerTableBody').innerHTML = this.data.players.map(p => `
+                    <tr>
+                        <td><div style="display:flex;align-items:center;gap:10px;">
+                            ${p.img ? `<img src="${p.img}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : ''}
+                            ${p.name}
+                        </div></td>
+                        <td>${p.role}</td><td>${p.basePrice}L</td>
+                        <td><span class="status-badge ${p.status === 'sold' ? 'status-sold' : ''}">${p.status}</span></td>
+                        <td>${p.soldTo || '-'}</td><td>${p.soldPrice || '-'}</td>
+                        <td><button class="btn btn-outline btn-sm" onclick="app.triggerImageUpload(${p.id})">📷 Edit Pic</button></td>
+                    </tr>
+                `).join('');
+            },
+
+            updateUI() {/* Generic refresh if needed */ }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => app.init());
+        window.onerror = (msg) => { console.error(msg); alert("Error: " + msg); return false; }
+    </script>
+</body>
+
+</html>
