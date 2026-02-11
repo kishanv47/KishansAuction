@@ -12,6 +12,33 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@500;700;900&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAqEg0oQyIYjCMEWRhDW9GgLz6Sw7M6pP4",
+            authDomain: "ipl-project-91164.firebaseapp.com",
+            projectId: "ipl-project-91164",
+            storageBucket: "ipl-project-91164.firebasestorage.app",
+            messagingSenderId: "1004445415107",
+            appId: "1:1004445415107:web:5d03f689fa7d8713f7d476",
+            measurementId: "G-B57Z8SPT17"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        window.firebaseDB = db;
+        window.firestoreDoc = doc;
+        window.firestoreSetDoc = setDoc;
+        window.firestoreGetDoc = getDoc;
+        
+        console.log("Firebase initialized!");
+    </script>
+    
     <style>
         :root {
             /* Color Palette - Premium Dark Theme */
@@ -875,6 +902,27 @@
             },
 
             init() {
+                // Try loading from cloud first
+                if (window.firebaseDB) {
+                    window.firestoreGetDoc(window.firestoreDoc(window.firebaseDB, 'auctions', 'current'))
+                        .then(docSnap => {
+                            if (docSnap.exists()) {
+                                const cloudData = docSnap.data();
+                                this.data = { ...this.data, ...cloudData.data };
+                                console.log("Loaded from cloud!");
+                            }
+                            this.continueInit();
+                        })
+                        .catch(err => {
+                            console.error("Cloud load error:", err);
+                            this.continueInit();
+                        });
+                } else {
+                    this.continueInit();
+                }
+            },
+            
+            continueInit() {
                 const saved = localStorage.getItem('auction_v2_data');
                 if (saved) {
                     const parsed = JSON.parse(saved);
@@ -951,6 +999,14 @@
             save() {
                 try {
                     localStorage.setItem('auction_v2_data', JSON.stringify(this.data));
+                    
+                    // Cloud Save to Firebase
+                    if (window.firebaseDB) {
+                        window.firestoreSetDoc(window.firestoreDoc(window.firebaseDB, 'auctions', 'current'), {
+                            data: this.data,
+                            lastUpdated: new Date().toISOString()
+                        }).catch(err => console.error("Cloud save error:", err));
+                    }
                 } catch (e) { alert("Storage Full! Cannot save image."); }
             },
 
