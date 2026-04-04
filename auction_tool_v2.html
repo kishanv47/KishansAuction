@@ -9,14 +9,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@500;700;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Bangers&family=Chakra+Petch:wght@400;600;700&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
+
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyAqEg0oQyIYjCMEWRhDW9GgLz6Sw7M6pP4",
@@ -28,17 +28,18 @@
             measurementId: "G-B57Z8SPT17"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp);
+
         window.firebaseDB = db;
         window.firestoreDoc = doc;
         window.firestoreSetDoc = setDoc;
         window.firestoreGetDoc = getDoc;
-        
+        window.firestoreOnSnapshot = onSnapshot;
+
         console.log("Firebase initialized!");
     </script>
-    
+
     <style>
         :root {
             /* Color Palette - Premium Dark Theme */
@@ -73,11 +74,20 @@
 
         body {
             background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at top right, rgba(79, 70, 229, 0.4), transparent 40%),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(2, 6, 23, 0.95)),
+                url('https://images.unsplash.com/photo-1540747915431-7e8c0fa312ea?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
+            background-size: cover, cover, cover;
+            background-position: center, center, center;
+            background-attachment: fixed, fixed, fixed;
+            background-blend-mode: normal, normal, normal;
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
         /* --- Animations --- */
@@ -115,13 +125,44 @@
             }
         }
 
-        @keyframes hammerPound {
+        /* --- Advanced Animations --- */
+        @keyframes battingSwing {
             0% {
-                transform: scale(1);
+                transform: rotate(-60deg) translateX(-100px);
+                opacity: 0;
             }
 
-            50% {
-                transform: scale(1.2);
+            60% {
+                transform: rotate(10deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
+        }
+
+        @keyframes bowlerRunup {
+            0% {
+                transform: scale(0.2) translateY(50px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes keeperCatch {
+            0% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(0.9);
+                opacity: 1;
             }
 
             100% {
@@ -129,8 +170,328 @@
             }
         }
 
-        .animate-hammer {
-            animation: hammerRotate 0.8s ease-in-out;
+        @keyframes allRounderSpin {
+            0% {
+                transform: perspective(500px) rotateY(90deg);
+                opacity: 0;
+            }
+
+            100% {
+                transform: perspective(500px) rotateY(0deg);
+                opacity: 1;
+            }
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            80% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* --- Premium Sports Broadcast Overlay --- */
+        .hero-overlay-content {
+            font-family: 'Chakra Petch', sans-serif;
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            /* Adjusted ratio for better text space */
+            align-items: center;
+            width: 95vw;
+            height: 90vh;
+            /* Fallback studio effect (if image missing) */
+            background:
+                radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 50%),
+                /* Top Spotlight */
+                radial-gradient(circle at 85% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                /* Side Spotlight */
+                radial-gradient(circle at center, #1e293b 0%, #0f172a 60%, #020617 100%);
+            /* Deep Dark Base */
+
+            /* Background Image - Embedded Base64 */
+            background-image: url('data:image/png;base64,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'),
+                radial-gradient(circle at center, #1e293b 0%, #0f172a 60%, #020617 100%);
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+
+            position: relative;
+            /* border: 4px solid #fbbf24; Removed border as requested */
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            /* Darker shadow for depth */
+            border-radius: 30px;
+            overflow: hidden;
+        }
+
+        /* Circuit Board Pattern Overlay (Simulated via grid) - Reduced opacity */
+        .hero-overlay-content::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding-left: 60px;
+            z-index: 10;
+            max-width: 100%;
+            /* Prevent overflow */
+        }
+
+        .hero-right {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            position: relative;
+            height: 100%;
+            z-index: 5;
+            overflow: hidden;
+            /* Contain player img */
+        }
+
+        /* Electric Glow on Player & Sizing Fix */
+        .hero-player-img {
+            max-height: 75vh;
+            /* Reduced from 95% to prevent clipping/overwhelming */
+            height: auto;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+            /* Electric Energy Outline */
+            filter: drop-shadow(0 0 15px #06b6d4) drop-shadow(0 0 30px #6366f1);
+            animation: slideUp 0.8s ease-out;
+            margin-bottom: -20px;
+            /* Anchor to bottom */
+        }
+
+        /* Role Badge */
+        .hero-role-badge {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            color: #fbbf24;
+            /* Gold */
+            letter-spacing: 3px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .hero-role-badge::before {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 2px;
+            background: #fbbf24;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 5rem);
+            /* Much larger for Name */
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 5px;
+            line-height: 1.1;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        /* 3D Metallic Gold Text */
+        .hero-sold-text {
+            font-size: clamp(3rem, 6vw, 6rem);
+            /* Slightly smaller to balance name */
+            line-height: 0.9;
+            font-weight: 900;
+            text-transform: uppercase;
+            /* Gradient Gold */
+            background: linear-gradient(to bottom, #fef3c7 0%, #f59e0b 50%, #b45309 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* 3D Drop Shadow effect */
+            filter: drop-shadow(0 5px 0 #78350f) drop-shadow(0 10px 5px rgba(0, 0, 0, 0.5));
+            margin-bottom: 30px;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-style: italic;
+        }
+
+        /* Redesigned Price Tag - Theme Gradient */
+        .hero-price-tag {
+            background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+            /* Indigo -> Cyan */
+            color: white;
+            padding: 15px 50px;
+            /* More breathing room */
+            font-size: clamp(2.5rem, 4vw, 4.5rem);
+            /* Reponsive */
+            font-weight: 800;
+            transform: skewX(-10deg);
+            /* Reduced skew */
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            /* Colored Glow */
+            margin-bottom: 30px;
+            border-left: 8px solid #fff;
+            /* Clean white accent */
+            border-radius: 4px;
+            /* Slight rounding */
+            animation: slideUp 0.8s ease-out;
+            display: inline-block;
+            white-space: nowrap;
+            /* Prevent wrap */
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-price-text {
+            transform: skewX(10deg);
+            /* Counter skew for text */
+            display: inline-block;
+            font-family: 'Chakra Petch', sans-serif;
+            letter-spacing: 2px;
+        }
+
+        /* White & Gold Team Banner */
+        .hero-team-banner {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: white;
+            padding: 10px 30px 10px 10px;
+            border-radius: 50px 10px 50px 50px;
+            border-right: 5px solid #fbbf24;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: slideUp 1s ease-out;
+            max-width: 95%;
+            /* Prevent sidebar overflow */
+        }
+
+        .hero-team-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            padding: 5px;
+            flex-shrink: 0;
+            /* Prevent logo squishing */
+        }
+
+        .hero-team-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            /* Text overflow handling */
+        }
+
+        .hero-team-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #64748b;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .hero-team-name {
+            font-size: clamp(1.2rem, 2vw, 2rem);
+            /* Auto-scale team name */
+            color: #0f172a;
+            text-transform: uppercase;
+            font-weight: 800;
+            line-height: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Role Specific Triggers */
+        .anim-batsman {
+            animation: battingSwing 1s ease-out forwards;
+        }
+
+        .anim-bowler {
+            animation: bowlerRunup 0.8s ease-out forwards;
+        }
+
+        .anim-wicket-keeper {
+            animation: keeperCatch 0.6s ease-out forwards;
+        }
+
+        .anim-all-rounder {
+            animation: allRounderSpin 1s ease-out forwards;
+        }
+
+        /* --- Admin & Controls --- */
+        .admin-controls-hidden {}
+
+        .admin-lock-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: 0.2s;
+        }
+
+        .admin-lock-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-banner {
+            background: var(--warning);
+            color: #1e293b;
+            text-align: center;
+            padding: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: none;
+            /* Show only when locked */
+        }
+
+        body.is-locked .viewer-banner {
+            display: block;
+        }
+
+        body.is-locked .admin-only {
+            pointer-events: none;
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        /* Exception for the lock button itself */
+        body.is-locked .brand {
+            pointer-events: auto;
+            opacity: 1;
+            filter: none;
         }
 
         /* --- Layout --- */
@@ -140,6 +501,8 @@
             padding: 20px;
             width: 100%;
             flex: 1;
+            padding-bottom: 80px;
+            /* Space for ticker */
         }
 
         .header {
@@ -203,22 +566,31 @@
         }
 
         /* --- Components --- */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow), var(--shadow-glow);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
         .view-section {
             display: none;
             animation: fadeIn 0.4s ease-out;
+            padding-bottom: 60px;
         }
 
         .view-section.active {
             display: block;
-        }
-
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
         }
 
         .grid-2 {
@@ -252,24 +624,35 @@
 
         .form-control {
             width: 100%;
-            padding: 12px;
-            background: var(--bg-dark);
+            padding: 14px 16px;
+            background: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 12px;
             color: var(--text-main);
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 12px 28px;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
+            border-radius: 12px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: 'Chakra Petch', sans-serif;
         }
 
         .btn:active {
@@ -311,30 +694,50 @@
             display: grid;
             grid-template-columns: 350px 1fr;
             gap: 30px;
-            height: calc(100vh - 160px);
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            /* height: calc(100vh - 160px); Removed fixed height to allow scrolling */
+            align-items: start;
         }
 
         .player-card-large {
-            background: var(--bg-card);
-            border-radius: 20px;
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+            border-radius: 30px;
             padding: 30px;
             text-align: center;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             flex-direction: column;
             align-items: center;
             height: 100%;
             justify-content: center;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player-card-large::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
         }
 
         .player-photo-lg {
-            width: 220px;
-            height: 220px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--primary);
+            width: 100%;
+            height: 400px;
+            /* Taller for full portrait */
+            border-radius: 12px;
+            /* Rounded rect */
+            object-fit: contain;
+            /* Show full image without crop */
+            /* border: 2px solid var(--primary); Removed blue line */
             margin-bottom: 24px;
-            box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.2);
         }
 
         .player-name-lg {
@@ -374,19 +777,21 @@
         }
 
         .bid-btn {
-            padding: 10px;
-            border-radius: 8px;
-            background: var(--bg-card);
+            padding: 15px 5px;
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.5);
             border: 1px solid var(--border);
-            color: var(--text-main);
+            color: var(--text-muted);
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 800;
+            font-family: 'Chakra Petch', sans-serif;
             transition: 0.2s;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .bid-btn:hover {
-            border-color: var(--accent);
-            background: rgba(6, 182, 212, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
         }
 
         .team-grid {
@@ -423,18 +828,34 @@
         }
 
         .current-bid-card {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1));
+            background: radial-gradient(circle at center, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.8));
             border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 20px;
-            padding: 25px;
+            border-radius: 24px;
+            padding: 30px;
             text-align: center;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .current-bid-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.1);
+            pointer-events: none;
         }
 
         #currentBidAmt {
-            font-size: 4.5rem;
+            font-size: 5.5rem;
             font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+            letter-spacing: -2px;
             line-height: 1;
-            margin: 10px 0;
+            margin: 15px 0;
+            font-family: 'Chakra Petch', sans-serif;
         }
 
         #currentBidTeam {
@@ -596,11 +1017,193 @@
             font-weight: 900;
             color: white;
         }
+
+        /* --- Role Animations --- */
+        .anim-batsman {
+            animation: pulse-bat 2s infinite;
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6));
+        }
+
+        .anim-bowler {
+            animation: shake-ball 2s infinite;
+            filter: drop-shadow(0 0 15px rgba(255, 69, 0, 0.6));
+        }
+
+        .anim-all-rounder {
+            animation: glow-all 2s infinite;
+            filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.6));
+        }
+
+        .anim-wicket-keeper {
+            animation: bounce-gloves 2s infinite;
+            filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.6));
+        }
+
+        @keyframes pulse-bat {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes shake-ball {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(5deg);
+            }
+
+            75% {
+                transform: rotate(-5deg);
+            }
+        }
+
+        @keyframes glow-all {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 10px cyan);
+            }
+
+            50% {
+                filter: drop-shadow(0 0 25px cyan);
+            }
+        }
+
+        @keyframes bounce-gloves {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* --- Live Ticker --- */
+        .ticker-wrap {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            border-top: 1px solid var(--accent);
+            color: #fff;
+            height: 50px;
+            line-height: 50px;
+            overflow: hidden;
+            white-space: nowrap;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+            display: flex;
+        }
+
+        .ticker-heading {
+            background: var(--accent);
+            color: #000;
+            padding: 0 20px;
+            font-weight: 800;
+            font-family: 'Chakra Petch', sans-serif;
+            text-transform: uppercase;
+            z-index: 10;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .ticker {
+            display: inline-block;
+            padding-left: 100%;
+            animation: ticker 60s linear infinite;
+        }
+
+        .ticker-item {
+            display: inline-block;
+            padding: 0 30px;
+            font-size: 1.1rem;
+            font-family: 'Chakra Petch', sans-serif;
+        }
+
+        .ticker-item strong {
+            color: var(--warning);
+        }
+
+        @keyframes ticker {
+            0% {
+                transform: translate3d(0, 0, 0);
+            }
+
+            100% {
+                transform: translate3d(-100%, 0, 0);
+            }
+        }
+
+        /* --- Bid History & Bottom Purse Table --- */
+        .bid-history-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .bid-log-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .bid-log-item:last-child {
+            border-bottom: none;
+        }
+
+        .purse-table-section {
+            grid-column: 1 / -1;
+            /* Span full width */
+            margin-top: 30px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .purse-mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .purse-mini-table th,
+        .purse-mini-table td {
+            padding: 8px 12px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .purse-mini-table th {
+            background: rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 
 <body>
 
+    <div class="viewer-banner">👁️ Viewer Mode (ReadOnly) - Ask Admin to Unlock for Bidding</div>
     <div class="app-container">
         <!-- Header -->
         <header class="header">
@@ -610,6 +1213,7 @@
                     <h1>Auction Master v2.1</h1>
                     <p>Ultimate Player Auction System</p>
                 </div>
+                <button class="admin-lock-btn" onclick="app.toggleAdmin()" title="Admin Lock">🔒</button>
             </div>
             <nav class="nav-tabs">
                 <button class="nav-btn active" onclick="app.switchTab('setup')">⚙️ Setup</button>
@@ -676,60 +1280,138 @@
                         </div>
                     </div>
 
-                    <h2 class="form-label" style="font-size: 1.2rem; margin: 25px 0 15px;">Data & Import</h2>
-                    <div class="grid-2">
-                        <button class="btn btn-outline" onclick="document.getElementById('excelInput').click()">📤
-                            Import Excel</button>
-                        <input type="file" id="excelInput" hidden accept=".xlsx, .xls" onchange="app.importExcel(this)">
-                        <button class="btn btn-outline" onclick="app.exportExcel()">📥 Export Teams Excel</button>
-                        <button class="btn btn-outline" style="color: var(--warning); border-color: var(--warning);"
-                            onclick="app.reviveUnsold()">♻️ Revive Unsold Players</button>
-                        <button class="btn btn-outline" onclick="document.getElementById('jsonInput').click()">📂 Load
-                            Test Data (JSON)</button>
-                        <input type="file" id="jsonInput" hidden accept=".json" onchange="app.importJSON(this)">
-                        <button class="btn btn-outline"
-                            style="color: var(--accent); border-color: var(--accent); grid-column: span 2;"
-                            onclick="app.generateSampleExcel()">📊 Create Sample Import File (Excel)</button>
+                                        <h2 class="form-label" style="font-size: 1.2rem; margin: 25px 0 15px;">Dynamic Bid Increments</h2>
+                    <div class="card" style="margin-bottom:0; padding:15px; background:rgba(0,0,0,0.2);">
+                        <div style="display:flex; flex-direction:column; gap:12px;">
+                            <!-- Tier 1 -->
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <strong style="width:50px;">Tier 1:</strong>
+                                <span style="font-size:0.9rem;">Up to</span>
+                                <input type="number" id="t1MaxVal" class="form-control" style="width:70px; padding:6px;" value="5" onchange="app.saveSettings()">
+                                <select id="t1MaxUnit" class="form-control" style="width:85px; padding:6px;" onchange="app.saveSettings()">
+                                    <option value="1">Lakhs</option>
+                                    <option value="100">Crores</option>
+                                </select>
+                                <span style="font-size:0.9rem; margin-left:5px;">Increase by</span>
+                                <input type="number" id="t1IncVal" class="form-control" style="width:70px; padding:6px;" value="20" onchange="app.saveSettings()">
+                                <select id="t1IncUnit" class="form-control" style="width:85px; padding:6px;" onchange="app.saveSettings()">
+                                    <option value="1">Lakhs</option>
+                                    <option value="100">Crores</option>
+                                </select>
+                            </div>
+                            <!-- Tier 2 -->
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <strong style="width:50px;">Tier 2:</strong>
+                                <span style="font-size:0.9rem;">Up to</span>
+                                <input type="number" id="t2MaxVal" class="form-control" style="width:70px; padding:6px;" value="10" onchange="app.saveSettings()">
+                                <select id="t2MaxUnit" class="form-control" style="width:85px; padding:6px;" onchange="app.saveSettings()">
+                                    <option value="1">Lakhs</option>
+                                    <option value="100">Crores</option>
+                                </select>
+                                <span style="font-size:0.9rem; margin-left:5px;">Increase by</span>
+                                <input type="number" id="t2IncVal" class="form-control" style="width:70px; padding:6px;" value="25" onchange="app.saveSettings()">
+                                <select id="t2IncUnit" class="form-control" style="width:85px; padding:6px;" onchange="app.saveSettings()">
+                                    <option value="1">Lakhs</option>
+                                    <option value="100">Crores</option>
+                                </select>
+                            </div>
+                            <!-- Tier 3 -->
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <strong style="width:50px;">Tier 3:</strong>
+                                <span style="font-size:0.9rem;">Up to</span>
+                                <input type="number" id="t3MaxVal" class="form-control" style="width:70px; padding:6px;" value="25" onchange="app.saveSettings()">
+                                <select id="t3MaxUnit" class="form-control" style="width:85px; padding:6px;" onchange="app.saveSettings()">
+                                    <option value="1">Lakhs</option>
+                                    <option value="100">Crores</option>
+                                </select>
+                                <span style="font-size:0.9rem; margin-left:5px;">Increase by</span>
+                                <input type="number" id="t3IncVal" class="form-control" style="width:70px; padding:6px;" value="50" onchange="app.saveSettings()">
+                                <select id="t3IncUnit" class="form-control" style="width:85px; padding:6px;" onchange="app.saveSettings()">
+                                    <option value="1">Lakhs</option>
+                                    <option value="100">Crores</option>
+                                </select>
+                            </div>
+                            <!-- Tier 4 -->
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <strong style="width:50px;">Tier 4:</strong>
+                                <span style="width:170px; font-weight:bold; font-size:0.9rem;">Anything Above Tier 3</span>
+                                <span style="font-size:0.9rem; margin-left:0px;">Increase by</span>
+                                <input type="number" id="t4IncVal" class="form-control" style="width:70px; padding:6px;" value="1" onchange="app.saveSettings()">
+                                <select id="t4IncUnit" class="form-control" style="width:85px; padding:6px;" onchange="app.saveSettings()">
+                                    <option value="1">Lakhs</option>
+                                    <option value="100">Crores</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <div style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted);">
-                        * Excel must have sheets "Teams" (Name, Budget, Logo) and "Players" (Name, Role, BasePrice,
-                        Image).
-                    </div>
-                </div>
 
-                <!-- Manual Add -->
-                <div class="card">
-                    <h2 class="form-label" style="font-size: 1.2rem; margin-bottom: 20px;">Manual Entry</h2>
-                    <div class="form-group">
-                        <label class="form-label">Add Team</label>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" id="setupTeamName" class="form-control" placeholder="Name">
-                            <input type="number" id="setupTeamBudget" class="form-control" placeholder="Budget (L)"
-                                style="width: 100px;">
-                            <button class="btn btn-primary" onclick="app.addTeam()">Add</button>
+                        <h2 class="form-label" style="font-size: 1.2rem; margin: 25px 0 15px;">Data & Import</h2>
+                        <div class="grid-2">
+                            <button class="btn btn-outline" onclick="document.getElementById('excelInput').click()">📤
+                                Import Excel</button>
+                            <input type="file" id="excelInput" hidden accept=".xlsx, .xls"
+                                onchange="app.importExcel(this)">
+                            <button class="btn btn-outline" onclick="app.exportExcel()">📥 Export Teams Excel</button>
+                            <button class="btn btn-outline" style="color: var(--warning); border-color: var(--warning);"
+                                onclick="app.reviveUnsold()">♻️ Revive Unsold Players</button>
+                            <button class="btn btn-outline" onclick="document.getElementById('jsonInput').click()">📂
+                                Load
+                                Test Data (JSON)</button>
+                            <input type="file" id="jsonInput" hidden accept=".json" onchange="app.importJSON(this)">
+                            <button class="btn btn-outline"
+                                style="color: var(--accent); border-color: var(--accent); grid-column: span 2;"
+                                onclick="app.generateSampleExcel()">📊 Create Sample Import File (Excel)</button>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted);">
+                            * Excel must have sheets "Teams" (Name, Budget, Logo) and "Players" (Name, Role, BasePrice,
+                            Image).
                         </div>
                     </div>
-                    <hr style="border-color: var(--border); margin: 20px 0;">
-                    <div class="form-group">
-                        <label class="form-label">Add Player</label>
-                        <input type="text" id="setupPlayerName" class="form-control" placeholder="Name">
-                        <div class="grid-2" style="margin-top: 10px;">
-                            <select id="setupPlayerRole" class="form-control">
-                                <option>Batsman</option>
-                                <option>Bowler</option>
-                                <option>All-Rounder</option>
-                                <option>Wicket-Keeper</option>
-                            </select>
-                            <input type="number" id="setupPlayerPrice" class="form-control" placeholder="Base Price">
+
+                    <!-- Manual Add -->
+                    <div class="card">
+                        <h2 class="form-label" style="font-size: 1.2rem; margin-bottom: 20px;">Manual Entry</h2>
+                        <div class="form-group">
+                            <label class="form-label">Add Team</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="setupTeamName" class="form-control" placeholder="Name">
+                                <input type="number" id="setupTeamBudget" class="form-control" placeholder="Budget (L)"
+                                    style="width: 100px;">
+                                <button class="btn btn-primary" onclick="app.addTeam()">Add</button>
+                            </div>
                         </div>
-                        <div class="form-group" style="margin-top: 10px;">
-                            <input type="text" id="setupPlayerImg" class="form-control"
-                                placeholder="Image URL (Optional)">
+                        <hr style="border-color: var(--border); margin: 20px 0;">
+                        <div class="form-group">
+                            <label class="form-label">Add Player</label>
+                            <input type="text" id="setupPlayerName" class="form-control" placeholder="Name">
+                            <div class="grid-2" style="margin-top: 10px;">
+                                <select id="setupPlayerRole" class="form-control">
+                                    <option>Batsman</option>
+                                    <option>Bowler</option>
+                                    <option>All-Rounder</option>
+                                    <option>Wicket-Keeper</option>
+                                </select>
+                                <input type="number" id="setupPlayerPrice" class="form-control"
+                                    placeholder="Base Price">
+                            </div>
+                            <div class="form-group" style="margin-top: 10px;">
+                                <input type="text" id="setupPlayerImg" class="form-control"
+                                    placeholder="Image URL (Optional)">
+                            </div>
+                            <button class="btn btn-success btn-block" onclick="app.addPlayer()">Add Player</button>
                         </div>
-                        <button class="btn btn-success btn-block" onclick="app.addPlayer()">Add Player</button>
+
+                        <hr style="border-color: var(--border); margin: 20px 0;">
+                        <div class="form-group">
+                            <label class="form-label">Voice Debugging</label>
+                            <button class="btn btn-warning btn-block" onclick="app.testVoice()">🔊 Test Indian
+                                Voice</button>
+                            <div id="voiceDebugList"
+                                style="margin-top:10px; font-size:0.8rem; height:100px; overflow-y:auto; background:rgba(0,0,0,0.3); padding:5px; display:none;">
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
         </section>
 
         <!-- AUCTION TAB -->
@@ -755,11 +1437,26 @@
 
                         <div
                             style="width: 100%; border-top: 1px solid var(--border); padding-top: 20px; margin-top: auto;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <!-- Spin Overlay -->
+                            <div id="spinOverlay"
+                                style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.8); z-index:10; border-radius:20px; align-items:center; justify-content:center; flex-direction:column;">
+                                <div style="font-size:3rem;">🎰</div>
+                                <div
+                                    style="font-family:'Chakra Petch'; font-size:1.5rem; color:#fbbf24; margin-top:10px;">
+                                    RANDOMIZING...</div>
+                            </div>
+
+                            <button id="btnSpin" class="btn btn-warning btn-block"
+                                style="display:none; margin-bottom:15px; font-size:1.2rem;"
+                                onclick="app.spinForPlayer()">🎰 SPIN FOR PLAYER</button>
+
+                            <div id="playerActions"
+                                style="display: none; justify-content: space-between; margin-bottom: 10px;">
                                 <span style="color: var(--text-muted);">Base Price</span>
                                 <span style="font-weight: 700; color: var(--text-main);" id="aucBasePrice">-</span>
                             </div>
-                            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
+                            <div id="playerControlBtns"
+                                style="display: none; gap: 10px; justify-content: center; margin-top: 10px;">
                                 <button class="btn btn-outline btn-sm" onclick="app.skipPlayer()">Skip</button>
                                 <button class="btn btn-outline btn-sm"
                                     style="color: var(--danger); border-color: var(--danger);"
@@ -769,34 +1466,41 @@
                     </div>
                 </div>
 
-                <!-- Right: Bidding Controls -->
+                <!-- Right: Bidding Controls & Info -->
                 <div class="bid-display-area" style="display: flex; flex-direction: column; gap: 20px;">
-                    <!-- Current Bid Status -->
-                    <div class="current-bid-card"
-                        style="background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.1)); border: 1px solid rgba(16,185,129,0.3); border-radius: 20px; padding: 25px; text-align: center;">
-                        <div
-                            style="font-size: 0.9rem; text-transform: uppercase; color: var(--success); font-weight: 700;">
-                            Current Bid</div>
-                        <div id="currentBidAmt"
-                            style="font-size: 4.5rem; font-weight: 900; line-height: 1; margin: 10px 0;">0L</div>
-                        <div id="currentBidTeam" style="font-size: 1.2rem; color: var(--text-muted);">No bids yet</div>
+
+                    <div class="grid-2">
+                        <!-- Current Bid Status -->
+                        <div class="current-bid-card"
+                            style="background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.1)); border: 1px solid rgba(16,185,129,0.3); border-radius: 20px; padding: 25px; text-align: center;">
+                            <div
+                                style="font-size: 0.9rem; text-transform: uppercase; color: var(--success); font-weight: 700;">
+                                Current Bid</div>
+                            <div id="currentBidAmt"
+                                style="font-size: 4.5rem; font-weight: 900; line-height: 1; margin: 10px 0;">0L</div>
+                            <div id="currentBidTeam" style="font-size: 1.2rem; color: var(--text-muted);">No bids yet
+                            </div>
+                        </div>
+
+                        <!-- Bid History Panel -->
+                        <div class="bid-history-container">
+                            <h4
+                                style="font-size:0.9rem; color:var(--text-muted); margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:5px;">
+                                Bid History</h4>
+                            <div id="bidHistoryList">
+                                <div style="text-align:center; color:var(--text-muted); padding:10px;">--</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Bid Increments Settings -->
-                    <div>
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <label class="form-label" style="font-size: 0.85rem; margin: 0;">Set Auto-Bid Increment
-                                (Lakhs)</label>
+                    <!-- Bid Increments Settings (Visual Only) -->
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="form-label" style="font-size: 0.9rem; margin: 0; color:var(--accent);">
+                            Auto-Increment: <span id="currentIncrementDisplay"
+                                style="font-weight:bold; color:white;">0.5L</span>
                         </div>
-                        <div class="bid-controls">
-                            <button class="bid-btn" id="btnStep1" onclick="app.setBidStep(1)">1L</button>
-                            <button class="bid-btn" id="btnStep5" onclick="app.setBidStep(5)">5L</button>
-                            <button class="bid-btn" id="btnStep10" onclick="app.setBidStep(10)">10L</button>
-                            <button class="bid-btn" id="btnStep20" onclick="app.setBidStep(20)">20L</button>
-                            <button class="bid-btn" id="btnStep25" onclick="app.setBidStep(25)">25L</button>
-                            <button class="bid-btn" id="btnStep50" onclick="app.setBidStep(50)">50L</button>
-                        </div>
+                        <button class="btn btn-outline btn-sm admin-only" onclick="app.undoBid()"
+                            style="font-size: 0.8rem; padding: 4px 10px;">↩ Undo Last Bid</button>
                     </div>
 
                     <!-- Teams Grid -->
@@ -804,65 +1508,136 @@
                     <div class="team-grid" id="auctionTeamGrid"></div>
 
                     <!-- Sell Button -->
-                    <button class="btn btn-success btn-block"
-                        style="padding: 20px; font-size: 1.3rem; margin-top: auto;" onclick="app.sellPlayer()">
+                    <button class="btn btn-success btn-block" style="padding: 20px; font-size: 1.3rem; margin-bottom: 20px;"
+                        onclick="app.sellPlayer()">
                         🔨 SOLD
                     </button>
+                    
+                    <!-- Manual Sell Override -->
+                    <div class="card admin-only" style="padding:15px; background:rgba(255,193,7,0.1); border:1px solid rgba(255,193,7,0.3);">
+                        <label style="display:flex; align-items:center; gap:10px; font-weight:bold; color:var(--warning); cursor:pointer;">
+                            <input type="checkbox" id="enableManualSell" onchange="document.getElementById('manualSellForm').style.display = this.checked ? 'block' : 'none';" style="width:18px; height:18px;">
+                            Enable Manual Sell Override
+                        </label>
+                        <div id="manualSellForm" style="display:none; margin-top:15px;">
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <select id="manualSellTeam" class="form-control">
+                                    <option value="" disabled selected>Select Team...</option>
+                                </select>
+                                <div style="display:flex; gap:10px;">
+                                    <input type="number" id="manualSellAmount" class="form-control" placeholder="Amount" style="flex:1;">
+                                    <select id="manualSellUnit" class="form-control" style="width:100px;">
+                                        <option value="1">Lakhs</option>
+                                        <option value="100">Crores</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-warning btn-block" style="font-weight:bold;" onclick="app.manualSell()">⚡ FORCE SELL</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- TEAMS TAB -->
-        <section id="teams" class="view-section">
-            <h2 class="form-label" style="font-size: 1.5rem; margin-bottom: 20px;">Team Squads</h2>
-            <div class="grid-3" id="teamsFullGrid">
-                <!-- Detailed team cards go here -->
+                <!-- Bottom Purse Table -->
+                <div class="purse-table-section">
+                    <h4 style="margin-bottom:15px; color:var(--text-muted);">Team Purse Summary</h4>
+                    <table class="purse-mini-table">
+                        <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th>Remaining Purse</th>
+                                <th>Players Bought</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bottomPurseTableBody">
+                            <!-- populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </section>
+    </div>
+    </section>
 
-        <!-- DASHBOARD TAB -->
-        <section id="dashboard" class="view-section">
-            <div class="grid-4" style="margin-bottom: 30px;">
-                <div class="stat-card card">
-                    <div class="stat-val" id="dashTeams">0</div>
-                    <div style="color:var(--text-muted)">Teams</div>
-                </div>
-                <div class="stat-card card">
-                    <div class="stat-val" id="dashSold">0</div>
-                    <div style="color:var(--text-muted)">Sold</div>
-                </div>
-                <div class="stat-card card">
-                    <div class="stat-val" id="dashSpent" style="color:var(--success)">0L</div>
-                    <div style="color:var(--text-muted)">Spent</div>
-                </div>
-                <div class="stat-card card">
-                    <div class="stat-val" id="dashUnsold" style="color:var(--warning)">0</div>
-                    <div style="color:var(--text-muted)">Unsold</div>
-                </div>
-            </div>
-            <div class="grid-3" id="dashTeamList"></div>
-        </section>
+    <!-- TEAMS TAB -->
+    <section id="teams" class="view-section">
+        <h2 class="form-label" style="font-size: 1.5rem; margin-bottom: 20px;">Team Squads</h2>
+        <div class="grid-3" id="teamsFullGrid">
+            <!-- Detailed team cards go here -->
+        </div>
+    </section>
 
-        <!-- PLAYERS TAB -->
-        <section id="players" class="view-section">
-            <h2 class="form-label" style="font-size: 1.5rem; margin-bottom: 20px;">Player Database</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Role</th>
-                            <th>Base</th>
-                            <th>Status</th>
-                            <th>Sold To</th>
-                            <th>Price</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="playerTableBody"></tbody>
-                </table>
+    <!-- DASHBOARD TAB -->
+    <section id="dashboard" class="view-section">
+        <div class="grid-4" style="margin-bottom: 30px;">
+            <div class="stat-card card">
+                <div class="stat-val" id="dashTeams">0</div>
+                <div style="color:var(--text-muted)">Teams</div>
             </div>
-        </section>
+            <div class="stat-card card">
+                <div class="stat-val" id="dashSold">0</div>
+                <div style="color:var(--text-muted)">Sold</div>
+            </div>
+            <div class="stat-card card">
+                <div class="stat-val" id="dashSpent" style="color:var(--success)">0L</div>
+                <div style="color:var(--text-muted)">Spent</div>
+            </div>
+            <div class="stat-card card">
+                <div class="stat-val" id="dashUnsold" style="color:var(--warning)">0</div>
+                <div style="color:var(--text-muted)">Unsold</div>
+            </div>
+        </div>
+        <div class="grid-3" id="dashTeamList"></div>
+    </section>
+
+    <!-- PLAYERS TAB -->
+    <section id="players" class="view-section">
+        <h2 class="form-label" style="font-size: 1.5rem; margin-bottom: 20px;">Player Database</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Base</th>
+                        <th>Status</th>
+                        <th>Sold To</th>
+                        <th>Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="playerTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+    </div>
+
+    <!-- PRE-ASSIGN OVERLAY -->
+    <div id="preAssignModal" class="modal-overlay">
+        <div class="modal-content" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; color: var(--text-main); text-align: left; max-width: 500px;">
+            <h2 id="preAssignPlayerName" style="font-size: 1.8rem; margin-bottom: 20px; font-family: 'Chakra Petch', sans-serif;">Assign Player</h2>
+            <div class="form-group">
+                <label class="form-label">Team</label>
+                <select id="preAssignTeam" class="form-control">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Designation</label>
+                <select id="preAssignRole" class="form-control">
+                    <option value="Captain">Captain</option>
+                    <option value="Icon Player">Icon Player</option>
+                    <option value="Retained">Retained</option>
+                    <option value="None">None</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Price (in Crores)</label>
+                <input type="number" id="preAssignPrice" class="form-control" placeholder="e.g. 10.5" step="0.1">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button class="btn btn-success btn-block" onclick="app.confirmPreAssign()">Confirm Assignment</button>
+                <button class="btn btn-outline btn-block" onclick="app.closePreAssignModal()">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <!-- SOLD OVERLAY -->
@@ -876,6 +1651,14 @@
             <div style="font-size: 1.5rem; color: white;">for <span id="soldPriceText"
                     style="color: var(--success); font-weight: bold;">Price</span></div>
             <button class="btn btn-primary" style="margin-top: 40px;" onclick="app.closeModal()">Next Player ➔</button>
+        </div>
+    </div>
+
+    <!-- LIVE TICKER -->
+    <div class="ticker-wrap">
+        <div class="ticker-heading">🔥 LIVE UPDATES</div>
+        <div class="ticker" id="liveTickerContent">
+            <div class="ticker-item">Welcome to the Auction! Waiting for first sale...</div>
         </div>
     </div>
 
@@ -897,64 +1680,79 @@
                     currentBid: 0,
                     currentBidder: null,
                     bidStep: 20, // Default increment
-                    auctionStarted: false
-                }
+                    auctionStarted: false,
+                    bidHistory: []
+                },
             },
+
+            isAdmin: false, // Client-side only - NOT saved to Firebase
 
             init() {
                 // Try loading from cloud first
                 if (window.firebaseDB) {
-                    window.firestoreGetDoc(window.firestoreDoc(window.firebaseDB, 'auctions', 'current'))
-                        .then(docSnap => {
-                            if (docSnap.exists()) {
-                                const cloudData = docSnap.data();
+                    // Real-time listener
+                    window.firestoreOnSnapshot(window.firestoreDoc(window.firebaseDB, 'auctions', 'current'), (docSnap) => {
+                        if (docSnap.exists()) {
+                            const cloudData = docSnap.data();
+                            // Basic diff check to prevent overwriting local unsaved state if we are the editor? 
+                            // For this simple tool, we assume 'cloud is truth'. 
+                            // But if we are admin and just clicked a button, we don't want to jitter.
+                            // We will simply merge.
+                            if (JSON.stringify(this.data) !== JSON.stringify({ ...this.data, ...cloudData.data })) {
                                 this.data = { ...this.data, ...cloudData.data };
-                                console.log("Loaded from cloud!");
+                                console.log("Received live update!");
+                                this.setupUI(); // Re-render everything
+                                this.renderTicker();
+                                // If we are in auction mode, refresh specific UI
+                                if (this.data.state.auctionStarted) {
+                                    this.renderAuctionUI();
+                                }
                             }
-                            this.continueInit();
-                        })
-                        .catch(err => {
-                            console.error("Cloud load error:", err);
-                            this.continueInit();
-                        });
+                        } else {
+                            console.log("No cloud data found.");
+                            // Try local ONLY on first load if cloud empty? 
+                            // Simplify: just alert or do nothing.
+                        }
+                    }, (err) => {
+                        console.error("Live sync error:", err);
+                    });
                 } else {
-                    this.continueInit();
+                    alert("Firebase not initialized! Sync unavailable.");
+                    this.setupUI();
                 }
             },
-            
-            continueInit() {
-                const saved = localStorage.getItem('auction_v2_data');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    this.data = { ...this.data, ...parsed };
 
-                    // ONE-TIME FIX: Remove duplicate teams
-                    const uniqueTeams = [];
-                    const seenNames = new Set();
-                    this.data.teams.forEach(t => {
-                        const n = t.name.trim().toLowerCase();
-                        if (!seenNames.has(n)) {
-                            seenNames.add(n);
-                            uniqueTeams.push(t);
-                        } else {
-                            // Merge bug fix: ensure the survivor has players if the duplicate does? 
-                            // Actually, let's keep the one that has players or lower remaining budget (most active)
-                            const existing = uniqueTeams.find(ut => ut.name.trim().toLowerCase() === n);
-                            if (t.players.length > existing.players.length || t.remaining < existing.remaining) {
-                                // Replace the existing inactive one with this active one
-                                uniqueTeams[uniqueTeams.indexOf(existing)] = t;
-                            }
-                        }
-                    });
-                    this.data.teams = uniqueTeams;
-                    this.save(); // Save cleaned data
+            setupUI() {
+                // Determine if we need to dedup based on data source?
+                // For safety, let's always run deduplication on start
+                this.deduplicateTeams();
 
-                    if (!this.data.settings) this.data.settings = { setsEnabled: false, sets: { 1: 'Batsman', 2: 'Bowler', 3: 'All-Rounder', 4: 'Wicket-Keeper' } };
-                }
+                if (!this.data.settings) this.data.settings = { setsEnabled: false, sets: { 1: 'Batsman', 2: 'Bowler', 3: 'All-Rounder', 4: 'Wicket-Keeper' } };
+                if (!this.data.settings.sets) this.data.settings.sets = { 1: 'Batsman', 2: 'Bowler', 3: 'All-Rounder', 4: 'Wicket-Keeper' };
 
                 // UI Init
                 document.getElementById('setsEnabled').checked = this.data.settings.setsEnabled;
                 document.getElementById('setsConfig').style.display = this.data.settings.setsEnabled ? 'block' : 'none';
+
+                // Bid Rules Init
+                if (!this.data.settings.bidRules || !this.data.settings.bidRules.tiers) {
+                    this.data.settings.bidRules = {
+                        tiers: [
+                            { maxVal: 5, maxUnit: 100, incVal: 20, incUnit: 1 },
+                            { maxVal: 10, maxUnit: 100, incVal: 25, incUnit: 1 },
+                            { maxVal: 25, maxUnit: 100, incVal: 50, incUnit: 1 },
+                            { maxVal: Infinity, maxUnit: 1, incVal: 1, incUnit: 100 }
+                        ]
+                    };
+                }
+                const t = this.data.settings.bidRules.tiers;
+                document.getElementById('t1MaxVal').value = t[0].maxVal; document.getElementById('t1MaxUnit').value = t[0].maxUnit;
+                document.getElementById('t1IncVal').value = t[0].incVal; document.getElementById('t1IncUnit').value = t[0].incUnit;
+                document.getElementById('t2MaxVal').value = t[1].maxVal; document.getElementById('t2MaxUnit').value = t[1].maxUnit;
+                document.getElementById('t2IncVal').value = t[1].incVal; document.getElementById('t2IncUnit').value = t[1].incUnit;
+                document.getElementById('t3MaxVal').value = t[2].maxVal; document.getElementById('t3MaxUnit').value = t[2].maxUnit;
+                document.getElementById('t3IncVal').value = t[2].incVal; document.getElementById('t3IncUnit').value = t[2].incUnit;
+                document.getElementById('t4IncVal').value = t[3].incVal; document.getElementById('t4IncUnit').value = t[3].incUnit;
 
                 // Set selectors init
                 for (let i = 1; i <= 4; i++) {
@@ -965,10 +1763,47 @@
                 this.updateUI();
 
                 // Set default bid step UI
-                this.setBidStep(this.data.state.bidStep || 20);
+                // this.setBidStep(this.data.state.bidStep || 20); // Removed as function no longer exists
+
+                // Initialize Admin UI
+                this.checkAdminUI();
+            },
+
+            // --- ADMIN LOCK ---
+            toggleAdmin() {
+                if (this.isAdmin) {
+                    // Lock it
+                    this.isAdmin = false;
+                    this.checkAdminUI();
+                } else {
+                    // Unlock it
+                    const pin = prompt("Enter Admin PIN to Unlock:");
+                    if (pin === "1111") {
+                        this.isAdmin = true;
+                        this.checkAdminUI();
+                    } else if (pin !== null) {
+                        alert("Wrong PIN!");
+                    }
+                }
+            },
+
+            checkAdminUI() {
+                const body = document.body;
+                const lockBtn = document.querySelector('.admin-lock-btn');
+
+                if (this.isAdmin) {
+                    body.classList.remove('is-locked');
+                    lockBtn.innerText = "🔓";
+                    lockBtn.title = "Lock Interface";
+                } else {
+                    body.classList.add('is-locked');
+                    lockBtn.innerText = "🔒";
+                    lockBtn.title = "Unlock Interface";
+                }
             },
 
             triggerImageUpload(pId) {
+                if (!this.isAdmin) return alert("Admin Lock Active!");
                 this.uploadingPlayerId = pId;
                 document.getElementById('playerImgUpload').click();
             },
@@ -998,16 +1833,28 @@
 
             save() {
                 try {
-                    localStorage.setItem('auction_v2_data', JSON.stringify(this.data));
-                    
                     // Cloud Save to Firebase
                     if (window.firebaseDB) {
+                        const cleanData = JSON.parse(JSON.stringify(this.data));
                         window.firestoreSetDoc(window.firestoreDoc(window.firebaseDB, 'auctions', 'current'), {
-                            data: this.data,
+                            data: cleanData,
                             lastUpdated: new Date().toISOString()
-                        }).catch(err => console.error("Cloud save error:", err));
+                        }).then(() => {
+                            console.log("Cloud save successful.");
+                        }).catch(err => {
+                            console.error("Cloud save error:", err);
+                            if (err.message && err.message.includes("exceeds the maximum")) {
+                                alert("Save Failed: Data exceeds the 1MB Firebase limit! Please use smaller images or remove some.");
+                            } else if (err.code === 'resource-exhausted') {
+                                alert("Save Failed: Quota exceeded or document too large (1MB limit limit).");
+                            } else {
+                                alert("Firebase Save Error: " + err.message);
+                            }
+                        });
+                    } else {
+                        console.warn("Firebase not available, data not saved.");
                     }
-                } catch (e) { alert("Storage Full! Cannot save image."); }
+                } catch (e) { console.error("Save failed:", e); }
             },
 
             saveSettings() {
@@ -1018,6 +1865,28 @@
                     const val = document.getElementById(`set${i}Role`).value;
                     this.data.settings.sets[i] = val;
                 }
+
+                // Bid Rules
+                this.data.settings.bidRules = {
+                    tiers: [
+                        {
+                            maxVal: Number(document.getElementById('t1MaxVal').value), maxUnit: Number(document.getElementById('t1MaxUnit').value),
+                            incVal: Number(document.getElementById('t1IncVal').value), incUnit: Number(document.getElementById('t1IncUnit').value)
+                        },
+                        {
+                            maxVal: Number(document.getElementById('t2MaxVal').value), maxUnit: Number(document.getElementById('t2MaxUnit').value),
+                            incVal: Number(document.getElementById('t2IncVal').value), incUnit: Number(document.getElementById('t2IncUnit').value)
+                        },
+                        {
+                            maxVal: Number(document.getElementById('t3MaxVal').value), maxUnit: Number(document.getElementById('t3MaxUnit').value),
+                            incVal: Number(document.getElementById('t3IncVal').value), incUnit: Number(document.getElementById('t3IncUnit').value)
+                        },
+                        {
+                            maxVal: Infinity, maxUnit: 1,
+                            incVal: Number(document.getElementById('t4IncVal').value), incUnit: Number(document.getElementById('t4IncUnit').value)
+                        }
+                    ]
+                };
 
                 document.getElementById('setInfoDisplay').innerText = this.data.settings.setsEnabled
                     ? `Sets Mode: Enabled (Starting Set 1: ${this.data.settings.sets[1]})`
@@ -1112,8 +1981,27 @@
                 if (this.data.teams.length === 0) return alert("No teams!");
                 document.getElementById('auctionStartOverlay').style.display = 'none';
                 document.getElementById('auctionInterface').style.display = 'grid';
+                this.data.state.auctionStarted = true;
                 this.data.state.currentSetIndex = 1;
                 this.nextPlayer();
+            },
+
+            normalizeRole(role) {
+                if (!role) return '';
+                return role.toLowerCase().replace(/[^a-z0-9]/g, '');
+            },
+
+            // Format Lakhs value → Crores display string
+            formatCr(lakhs) {
+                if (lakhs === undefined || lakhs === null || lakhs === '-') return '-';
+                const cr = lakhs / 100;
+                if (Math.abs(cr) >= 1) {
+                    // Show up to 2 decimal places, strip trailing zeros
+                    return parseFloat(cr.toFixed(2)) + ' Cr';
+                } else {
+                    // Below 1 Cr, show in Lakhs
+                    return parseFloat(lakhs.toFixed(2)) + ' L';
+                }
             },
 
             nextPlayer() {
@@ -1121,14 +2009,17 @@
 
                 // Sets Logic
                 if (this.data.settings.setsEnabled) {
-                    let setRole = this.data.settings.sets[this.data.state.currentSetIndex];
-                    let setPlayers = pending.filter(p => p.role === setRole);
+                    let rawSetRole = this.data.settings.sets[this.data.state.currentSetIndex];
+                    let normSetRole = this.normalizeRole(rawSetRole);
+
+                    let setPlayers = pending.filter(p => this.normalizeRole(p.role) === normSetRole);
 
                     // If no players in this set, move to next
                     while (setPlayers.length === 0 && this.data.state.currentSetIndex < 4) {
                         this.data.state.currentSetIndex++;
-                        setRole = this.data.settings.sets[this.data.state.currentSetIndex];
-                        setPlayers = pending.filter(p => p.role === setRole);
+                        rawSetRole = this.data.settings.sets[this.data.state.currentSetIndex];
+                        normSetRole = this.normalizeRole(rawSetRole);
+                        setPlayers = pending.filter(p => this.normalizeRole(p.role) === normSetRole);
                     }
 
                     // If still no players (finished all sets), check leftovers or finish
@@ -1136,31 +2027,136 @@
                         // Check if any pending players with OTHER roles remain (misclassified or extras)
                         if (pending.length > 0) {
                             if (confirm("All sets finished! Process remaining players?")) {
-                                // Fallback to random for remainder
+                                // Fallback to random for remainder and disable sets to prevent repeated prompts
+                                this.data.settings.setsEnabled = false;
+                                document.getElementById('setsEnabled').checked = false;
+                                this.save();
                             } else {
+                                this.data.state.auctionStarted = false;
+                                document.getElementById('auctionStartOverlay').style.display = 'block';
+                                document.getElementById('auctionInterface').style.display = 'none';
                                 return alert("Auction Completed!");
                             }
                         } else {
+                            this.data.state.auctionStarted = false;
+                            document.getElementById('auctionStartOverlay').style.display = 'block';
+                            document.getElementById('auctionInterface').style.display = 'none';
                             return alert("Auction Completed! All players sold.");
                         }
                     } else {
                         pending = setPlayers; // Restrict pool to this set
+                        console.log(`Set ${this.data.state.currentSetIndex} (${rawSetRole}): ${pending.length} players found.`);
                     }
                 }
 
-                if (pending.length === 0) return alert("No more players!");
+                if (pending.length === 0) {
+                    this.data.state.auctionStarted = false;
+                    document.getElementById('auctionStartOverlay').style.display = 'block';
+                    document.getElementById('auctionInterface').style.display = 'none';
+                    return alert("No more players! Auction Completed.");
+                }
 
-                // Randomize Selection
-                const randomIndex = Math.floor(Math.random() * pending.length);
-                const player = pending[randomIndex];
+                // Store pool and show Spin UI
+                this.data.state.pendingPool = pending;
+                this.data.state.currentItem = null;
+
+                // Show "Ready to Spin" state
+                this.renderSpinReadyState();
+            },
+
+            renderSpinReadyState() {
+                // Clear current player view
+                document.getElementById('aucPlayerName').innerText = "???";
+                document.getElementById('aucPlayerRole').innerText = this.data.settings.setsEnabled ?
+                    this.data.settings.sets[this.data.state.currentSetIndex] : "ANY ROLE";
+                document.getElementById('aucBasePrice').innerText = "-";
+                document.getElementById('aucPlayerImgContainer').innerHTML = `<div class="player-placeholder-lg" style="font-size:3rem">🎲</div>`;
+
+                // Toggle Buttons
+                document.getElementById('btnSpin').style.display = 'block';
+                document.getElementById('playerActions').style.display = 'none';
+                document.getElementById('playerControlBtns').style.display = 'none';
+
+                // Hide bids
+                document.getElementById('currentBidAmt').innerText = "-";
+                document.getElementById('currentBidTeam').innerText = "Spin to select player";
+            },
+
+            spinForPlayer() {
+                const pool = this.data.state.pendingPool;
+                if (!pool || pool.length === 0) return this.nextPlayer(); // Safety fallback
+
+                const btn = document.getElementById('btnSpin');
+                btn.disabled = true;
+                btn.innerText = "SPINNING...";
+
+                // Animation Config
+                let duration = 2000; // ms
+                let interval = 100;
+                let startTime = Date.now();
+
+                const animate = () => {
+                    const now = Date.now();
+                    const progress = now - startTime;
+
+                    // Random pick for visual
+                    const rIdx = Math.floor(Math.random() * pool.length);
+                    const p = pool[rIdx];
+
+                    // Simple render
+                    document.getElementById('aucPlayerName').innerText = p.name;
+                    if (p.img) document.getElementById('aucPlayerImgContainer').innerHTML = `<img src="${p.img}" class="player-photo-lg" style="opacity:0.7">`;
+                    else document.getElementById('aucPlayerImgContainer').innerHTML = `<div class="player-placeholder-lg">${p.name.charAt(0)}</div>`;
+
+                    if (progress < duration) {
+                        // Decelerate (increase interval) works better with setTimeout recursion, 
+                        // but simple linear requestAnimationFrame is fine for web perf
+                        requestAnimationFrame(animate);
+                    } else {
+                        // Finish Spin
+                        this.finishSpin(pool);
+                    }
+                };
+
+                animate();
+            },
+
+            finishSpin(pool) {
+                // Actual Random Selection
+                let randomIndex = Math.floor(Math.random() * pool.length);
+                let player = pool[randomIndex];
+
+                // Prevent consecutive repeats: if we randomly hit the exact player we just skipped, 
+                // and there are other players left, shift the index to the next player.
+                if (pool.length > 1 && this.data.state.lastSkippedId === player.id) {
+                    randomIndex = (randomIndex + 1) % pool.length;
+                    player = pool[randomIndex];
+                }
+
+                // Clear the tracking so they can be drawn later normally
+                this.data.state.lastSkippedId = null;
+
                 this.data.state.currentItem = player;
                 this.data.state.currentBid = player.basePrice;
                 this.data.state.currentBidder = null;
+                this.data.state.bidHistory = [];
+                document.getElementById('bidHistoryList').innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:10px;">No bids yet</div>';
+
+                // Reset UI
+                document.getElementById('btnSpin').style.display = 'none';
+                document.getElementById('btnSpin').disabled = false;
+                document.getElementById('btnSpin').innerText = "🎰 SPIN FOR PLAYER";
+
+                document.getElementById('playerActions').style.display = 'flex';
+                document.getElementById('playerControlBtns').style.display = 'flex';
 
                 this.renderAuctionUI();
+
+                // Voice announcement disabled per user request
             },
 
             reviveUnsold() {
+                if (!this.isAdmin) return alert("Admin Lock Active!");
                 const count = this.data.players.filter(p => p.status === 'unsold').length;
                 if (count === 0) return alert("No unsold players to revive!");
 
@@ -1179,7 +2175,7 @@
                 const p = this.data.state.currentItem;
                 document.getElementById('aucPlayerName').innerText = p.name;
                 document.getElementById('aucPlayerRole').innerText = p.role;
-                document.getElementById('aucBasePrice').innerText = p.basePrice + "L";
+                document.getElementById('aucBasePrice').innerText = this.formatCr(p.basePrice);
 
                 const imgContainer = document.getElementById('aucPlayerImgContainer');
                 if (p.img) {
@@ -1190,6 +2186,7 @@
 
                 this.updateBidBoard();
                 this.renderAuctionTeams();
+                this.renderPurseTable();
             },
 
             renderAuctionTeams() {
@@ -1200,54 +2197,108 @@
                     return `
                         <button class="team-bid-btn ${isLeader ? 'active-bidder' : ''}" onclick="app.placeBid(${t.id})" ${!canAfford ? 'disabled' : ''}>
                              <div style="font-weight:700">${t.name}</div>
-                             <div style="font-size:0.8rem">Rem: ${t.remaining}L</div>
+                             <div style="font-size:0.8rem">Rem: ${this.formatCr(t.remaining)}</div>
                              <div style="font-size:0.8rem">Squad: ${t.playerCount}</div>
                         </button>
                     `;
                 }).join('');
-            },
 
-            updateBidBoard() {
-                document.getElementById('currentBidAmt').innerText = this.data.state.currentBid + "L";
-                const leader = this.data.teams.find(t => t.id === this.data.state.currentBidder);
-                document.getElementById('currentBidTeam').innerText = leader ? `Winning: ${leader.name}` : "Waiting for bid...";
-                document.getElementById('currentBidTeam').style.color = leader ? 'var(--success)' : 'var(--text-muted)';
-            },
-
-            setBidStep(step) {
-                this.data.state.bidStep = step;
-                // Update UI active state
-                document.querySelectorAll('.bid-btn').forEach(b => {
-                    b.style.background = 'var(--bg-card)';
-                    b.style.color = 'var(--text-main)';
-                    b.style.borderColor = 'var(--border)';
-                });
-                const activeBtn = document.getElementById(`btnStep${step}`);
-                if (activeBtn) {
-                    activeBtn.style.background = 'var(--primary)';
-                    activeBtn.style.color = 'white';
-                    activeBtn.style.borderColor = 'var(--primary)';
+                const sel = document.getElementById('manualSellTeam');
+                if (sel) {
+                    sel.innerHTML = '<option value="" disabled selected>Select Team...</option>' + 
+                    this.data.teams.map(t => `<option value="${t.id}">${t.name} (${this.formatCr(t.remaining)})</option>`).join('');
                 }
             },
 
+            updateBidBoard() {
+                document.getElementById('currentBidAmt').innerText = this.formatCr(this.data.state.currentBid);
+                const leader = this.data.teams.find(t => t.id === this.data.state.currentBidder);
+                document.getElementById('currentBidTeam').innerText = leader ? `Winning: ${leader.name}` : "Waiting for bid...";
+                document.getElementById('currentBidTeam').style.color = leader ? 'var(--success)' : 'var(--text-muted)';
+
+                // Update Auto-Increment Display
+                const nextInc = this.getDynamicIncrement();
+                const incEl = document.getElementById('currentIncrementDisplay');
+                if (incEl) incEl.innerText = this.formatCr(nextInc);
+            },
+
+            getDynamicIncrement() {
+                const current = this.data.state.currentBid;
+                const rules = this.data.settings.bidRules;
+                
+                if (!rules || !rules.tiers) {
+                    const fallback = rules || { threshold: 10, low: 0.5, high: 1 };
+                    if (current < fallback.threshold) return fallback.low;
+                    return fallback.high;
+                }
+                
+                const t = rules.tiers;
+                if (current < (t[0].maxVal * t[0].maxUnit)) return t[0].incVal * t[0].incUnit;
+                if (current < (t[1].maxVal * t[1].maxUnit)) return t[1].incVal * t[1].incUnit;
+                if (current < (t[2].maxVal * t[2].maxUnit)) return t[2].incVal * t[2].incUnit;
+                return t[3].incVal * t[3].incUnit;
+            },
+
+            // setBidStep removed - dynamic now
+
             placeBid(teamId) {
+                if (!this.isAdmin) return alert("Admin Lock Active! Unlock to Bid.");
+
                 const team = this.data.teams.find(t => t.id === teamId);
                 let newBid = this.data.state.currentBid;
 
                 // If someone holds the bid, clicking another team implies raising it by step
                 if (this.data.state.currentBidder) {
-                    newBid += this.data.state.bidStep;
+                    newBid += this.getDynamicIncrement();
                 }
 
                 if (team.remaining < newBid) return alert("Low Budget!");
+
+                this.data.state.bidHistory.push({
+                    bid: this.data.state.currentBid,
+                    bidder: this.data.state.currentBidder
+                });
 
                 this.data.state.currentBid = newBid;
                 this.data.state.currentBidder = teamId;
                 this.updateBidBoard();
                 this.renderAuctionTeams();
+
+                // Update History UI
+                const container = document.getElementById('bidHistoryList');
+                if (this.data.state.bidHistory.length === 1) container.innerHTML = ''; // Clear empty state
+
+                container.innerHTML = `
+                    <div class="bid-log-item" style="animation:fadeIn 0.2s">
+                        <span style="color:var(--text-main); font-weight:bold;">${team.name}</span>
+                        <span style="color:var(--success); font-weight:bold;">${this.formatCr(newBid)}</span>
+                    </div>
+                ` + container.innerHTML;
+            },
+
+            undoBid() {
+                if (!this.isAdmin) return alert("Admin Lock Active!");
+                if (!this.data.state.bidHistory || this.data.state.bidHistory.length === 0) return alert("No bids to undo for this player!");
+
+                const lastState = this.data.state.bidHistory.pop();
+                this.data.state.currentBid = lastState.bid;
+                this.data.state.currentBidder = lastState.bidder;
+
+                this.updateBidBoard();
+                this.renderAuctionTeams();
+
+                // Remove last log entry
+                const container = document.getElementById('bidHistoryList');
+                if (container.firstElementChild) {
+                    container.removeChild(container.firstElementChild);
+                }
+                if (this.data.state.bidHistory.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:10px;">No bids yet</div>';
+                }
             },
 
             sellPlayer() {
+                if (!this.isAdmin) return alert("Admin Lock Active!");
                 if (!this.data.state.currentBidder) return alert("No Bidder!");
 
                 const p = this.data.state.currentItem;
@@ -1263,11 +2314,61 @@
 
                 this.save();
                 this.showSoldOverlay(p.name, t.name, p.soldPrice);
+                this.renderTicker(); // Update ticker live
+                this.renderAuctionTeams();
+                this.renderPurseTable();
+            },
+
+            manualSell() {
+                if (!this.isAdmin) return alert("Admin Lock Active!");
+                
+                const teamId = document.getElementById('manualSellTeam').value;
+                const amt = document.getElementById('manualSellAmount').value;
+                const unit = document.getElementById('manualSellUnit').value;
+                
+                if (!teamId) return alert("Select a team first!");
+                if (!amt || amt <= 0) return alert("Enter a valid amount!");
+                
+                const finalPrice = Number(amt) * Number(unit);
+                const p = this.data.state.currentItem;
+                if (!p) return alert("No player active!");
+                
+                const t = this.data.teams.find(team => team.id.toString() === teamId);
+                if (t.remaining < finalPrice) {
+                    if (!confirm(`Team only has ${this.formatCr(t.remaining)} remaining. Proceed anyway causing negative purse?`)) return;
+                }
+                
+                // Add final manual bid to history
+                this.data.state.bidHistory.push({
+                    bid: finalPrice,
+                    bidder: t.id
+                });
+                
+                p.status = 'sold';
+                p.soldTo = t.name;
+                p.soldPrice = finalPrice;
+                
+                t.players.push(p.id);
+                t.playerCount++;
+                t.remaining -= p.soldPrice;
+                
+                // Hide manual UI after sell
+                document.getElementById('enableManualSell').checked = false;
+                document.getElementById('manualSellForm').style.display = 'none';
+                document.getElementById('manualSellAmount').value = '';
+
+                this.save();
+                this.showSoldOverlay(p.name, t.name, p.soldPrice);
+                this.renderTicker();
+                this.renderAuctionTeams();
+                this.renderPurseTable();
             },
 
             skipPlayer() {
+                if (!this.isAdmin) return alert("Admin Lock Active!");
                 // Move current item to end of array to cycle it
                 const p = this.data.state.currentItem;
+                this.data.state.lastSkippedId = p.id; // Track them to prevent an immediate re-draw
                 // Remove form index
                 const idx = this.data.players.findIndex(x => x.id === p.id);
                 this.data.players.splice(idx, 1);
@@ -1277,6 +2378,7 @@
             },
 
             unsoldPlayer() {
+                if (!this.isAdmin) return alert("Admin Lock Active!");
                 const p = this.data.state.currentItem;
                 p.status = 'unsold';
                 this.save();
@@ -1286,41 +2388,138 @@
             // --- ANIMATION & MODAL ---
             showSoldOverlay(pName, tName, price) {
                 const modal = document.getElementById('modalOverlay');
-                const hammer = document.getElementById('hammerIcon');
+                const p = this.data.players.find(player => player.name === pName); // Find full player object for Role/Img
+                const t = this.data.teams.find(team => team.name === tName); // Find full team for Logo
 
-                document.getElementById('soldDetailText').innerText = pName;
-                document.getElementById('soldTeamText').innerText = tName;
-                document.getElementById('soldPriceText').innerText = price + "L";
+                const roleClass = p ? `anim-${p.role.toLowerCase().replace(' ', '-')}` : '';
+                const playerImg = p && p.img ? p.img : null;
+                const teamLogo = t && t.logo ? t.logo : null;
+
+                modal.innerHTML = `
+                    <div class="hero-overlay-content">
+                        <div class="hero-left">
+                            <div class="hero-role-badge">${p ? p.role : 'PLAYER'}</div>
+                            <h2 class="hero-title">${pName}</h2>
+                            <div class="hero-sold-text">SOLD</div>
+                            <div class="hero-price-tag">
+                                <span style="font-size:2rem; vertical-align:top; margin-right:5px;">SOLD FOR</span>
+                                <div class="hero-price-text">${this.formatCr(price)}</div>
+                            </div>
+                            
+                            <div class="hero-team-banner">
+                                ${teamLogo ? `<img src="${teamLogo}" class="hero-team-logo">` : ''}
+                                <div class="hero-team-info">
+                                    <div class="hero-team-label">Sold To</div>
+                                    <div class="hero-team-name">${tName}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hero-right">
+                             ${playerImg
+                        ? `<img src="${playerImg}" class="hero-player-img ${roleClass}">`
+                        : `<div style="font-size:10rem; color:#334155;">👤</div>`
+                    }
+                        </div>
+                        <button class="btn btn-primary" style="position:absolute; bottom:30px; right:30px; z-index:10;" onclick="app.closeModal()">Next Player ➔</button>
+                    </div>
+                `;
 
                 modal.style.display = 'flex';
-                hammer.classList.add('animate-hammer');
 
-                // Trigger Confetti
+                // Trigger Confetti - Multiple bursts for "Pro" feel
                 if (window.confetti) {
-                    var duration = 3000;
-                    var end = Date.now() + duration;
-                    (function frame() {
-                        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#6366f1', '#06b6d4', '#10b981'] });
-                        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#6366f1', '#06b6d4', '#10b981'] });
-                        if (Date.now() < end) requestAnimationFrame(frame);
-                    }());
+                    const count = 300;
+                    const defaults = { origin: { y: 0.7 }, zIndex: 1500 };
+
+                    function fire(particleRatio, opts) {
+                        confetti(Object.assign({}, defaults, opts, {
+                            particleCount: Math.floor(count * particleRatio)
+                        }));
+                    }
+
+                    fire(0.25, { spread: 26, startVelocity: 55 });
+                    fire(0.2, { spread: 60 });
+                    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+                    fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+                    fire(0.1, { spread: 120, startVelocity: 45 });
                 }
 
-                // Voice Over
-                if ('speechSynthesis' in window) {
-                    const text = `Sold! ${pName} to ${tName} for ${price} Lakhs`;
-                    const utt = new SpeechSynthesisUtterance(text);
-                    utt.rate = 1.1;
-                    window.speechSynthesis.speak(utt);
-                }
-
-                // Remove animation class after it runs so it can run again
-                setTimeout(() => hammer.classList.remove('animate-hammer'), 1000);
+                // Voice Over has been disabled per user request
             },
 
             closeModal() {
                 document.getElementById('modalOverlay').style.display = 'none';
                 this.nextPlayer();
+            },
+
+            // --- PRE-ASSIGN ---
+            openPreAssignModal(playerId) {
+                if (!this.isAdmin) return alert("Admin Lock Active!");
+                if (this.data.teams.length === 0) return alert("No teams available! Please add teams first.");
+                
+                this.preAssignPlayerId = playerId;
+                const p = this.data.players.find(x => x.id === playerId);
+                
+                document.getElementById('preAssignPlayerName').innerText = "Assign: " + p.name;
+                
+                const teamSel = document.getElementById('preAssignTeam');
+                teamSel.innerHTML = '<option value="" disabled selected>Select Team...</option>' + 
+                    this.data.teams.map(t => `<option value="${t.id}">${t.name} (${this.formatCr(t.remaining)} rem)</option>`).join('');
+                    
+                document.getElementById('preAssignPrice').value = '';
+                document.getElementById('preAssignModal').style.display = 'flex';
+            },
+
+            closePreAssignModal() {
+                document.getElementById('preAssignModal').style.display = 'none';
+                this.preAssignPlayerId = null;
+            },
+
+            confirmPreAssign() {
+                const teamId = document.getElementById('preAssignTeam').value;
+                const role = document.getElementById('preAssignRole').value;
+                const priceCr = document.getElementById('preAssignPrice').value;
+
+                if (!teamId) return alert("Please select a team.");
+                if (!priceCr || priceCr < 0) return alert("Please enter a valid price in Crores.");
+
+                const priceLakhs = parseFloat(priceCr) * 100;
+                
+                const p = this.data.players.find(x => x.id === this.preAssignPlayerId);
+                const t = this.data.teams.find(team => team.id.toString() === teamId);
+                
+                if (t.remaining < priceLakhs) {
+                    if (!confirm(`Team only has ${this.formatCr(t.remaining)} remaining. Proceed anyway causing negative purse?`)) return;
+                }
+
+                // Update Player
+                p.status = 'sold';
+                p.soldTo = t.name;
+                p.soldPrice = priceLakhs;
+                
+                if (role !== "None") {
+                    p.name = `${p.name} (${role})`;
+                }
+
+                // Update Team
+                t.players.push(p.id);
+                t.playerCount++;
+                t.remaining -= p.soldPrice;
+                
+                this.save();
+                this.closePreAssignModal();
+                this.renderPlayerTable();
+                
+                // If we are currently showing a relevant tab, update it
+                this.deduplicateTeams();
+                if (document.getElementById('teams').classList.contains('active')) this.renderTeamsTab();
+                if (document.getElementById('dashboard').classList.contains('active')) this.renderDashboard();
+                if (document.getElementById('auction').classList.contains('active')) {
+                    this.renderAuctionTeams();
+                    this.renderPurseTable();
+                }
+                
+                alert(`${p.name} assigned successfully!`);
             },
 
             // --- EXCEL ---
@@ -1330,7 +2529,7 @@
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, tSheet, "Teams");
                 XLSX.utils.book_append_sheet(wb, pSheet, "Players");
-                XLSX.writeFile(wb, "action_data.xlsx");
+                XLSX.writeFile(wb, "auction_data.xlsx");
             },
 
             importExcel(input) {
@@ -1349,7 +2548,7 @@
                         const tData = XLSX.utils.sheet_to_json(workbook.Sheets['Teams']);
                         tData.forEach(r => {
                             // Map Excel columns to our format
-                            this.addTeam(r.Name || r.TeamName, r.Budget, r.Logo || r.LogoURL);
+                            this.addTeam(r.Name || r.TeamName || r.name, r.Budget || r.budget, r.Logo || r.LogoURL || r.logo);
                         });
                     }
 
@@ -1357,7 +2556,7 @@
                     if (workbook.Sheets['Players']) {
                         const pData = XLSX.utils.sheet_to_json(workbook.Sheets['Players']);
                         pData.forEach(r => {
-                            this.addPlayer(r.Name || r.PlayerName, r.Role, r.BasePrice || r.Price, r.Image || r.ImageURL || r.ProfilePicture);
+                            this.addPlayer(r.Name || r.PlayerName || r.name, r.Role || r.role, r.BasePrice || r.Price || r.basePrice || r.baseprice, r.Image || r.ImageURL || r.ProfilePicture || r.img);
                         });
                     }
                     alert("Import Complete!");
@@ -1429,29 +2628,36 @@
             renderTeamsTab() {
                 const container = document.getElementById('teamsFullGrid');
                 container.innerHTML = this.data.teams.map(t => {
-                    // Resolve player objects
-                    const teamPlayers = this.data.players.filter(p => p.soldTo === t.name); // Using name match safely or id if possible. 
-                    // Better to use ID matching but soldTo is easy for display.
+                    const teamPlayers = this.data.players.filter(p => p.soldTo === t.name);
 
                     return `
-                        <div class="team-detail-card">
-                            <div class="team-detail-header">
-                                <div>
-                                    <h3 style="font-size: 1.2rem;">${t.name}</h3>
-                                    <div style="font-size: 0.85rem; color: var(--text-muted);">${teamPlayers.length} Players</div>
+                        <div class="team-detail-card" style="background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                            <div class="team-detail-header" style="background: linear-gradient(90deg, rgba(99,102,241,0.1), transparent); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 25px;">
+                                <div style="display:flex; align-items:center; gap:15px;">
+                                    ${t.logo ? `<img src="${t.logo}" style="width:60px; height:60px; object-fit:contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));">` : '<span style="font-size:3rem">🏏</span>'}
+                                    <div>
+                                        <h3 style="font-family:'Chakra Petch', sans-serif; font-size: 1.8rem; text-transform:uppercase; margin-bottom:5px; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${t.name}</h3>
+                                        <div style="font-size: 0.9rem; color: var(--accent); letter-spacing:1px; font-weight:bold;">${teamPlayers.length} / ${t.playerCount} SQUAD</div>
+                                    </div>
                                 </div>
                                 <div style="text-align: right;">
-                                    <div style="color: var(--success); font-weight: bold;">${t.remaining}L</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Remaining</div>
+                                    <div style="font-family:'Chakra Petch', sans-serif; font-size: 2rem; color: var(--success); font-weight: bold; text-shadow: 0 0 10px rgba(16,185,129,0.3);">${this.formatCr(t.remaining)}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Purse Rem.</div>
                                 </div>
                             </div>
-                            <div class="team-players-list">
+                            <div class="team-players-list" style="padding: 20px;">
                                 ${teamPlayers.length ? teamPlayers.map(p => `
-                                    <div class="team-player-row">
-                                        <span>${p.name} (${p.role.charAt(0)})</span>
-                                        <span style="color: var(--success);">${p.soldPrice}L</span>
+                                    <div class="team-player-row" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px; border-radius: 8px; padding: 12px; align-items:center;">
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            ${p.img ? `<img src="${p.img}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border: 2px solid var(--border);">` : '<div style="width:40px; height:40px; border-radius:50%; background:#334155;"></div>'}
+                                            <div>
+                                                <div style="font-weight:bold; font-size:1.1rem; color:#f8fafc;">${p.name}</div>
+                                                <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase;">${p.role}</div>
+                                            </div>
+                                        </div>
+                                        <div style="font-family:'Chakra Petch', sans-serif; font-weight:bold; font-size:1.3rem; color: var(--accent);">${this.formatCr(p.soldPrice)}</div>
                                     </div>
-                                `).join('') : '<div style="text-align:center; color:var(--text-muted); font-size:0.8rem;">No players yet</div>'}
+                                `).join('') : '<div style="text-align:center; color:var(--text-muted); font-style:italic; padding:20px;">No players signed yet</div>'}
                             </div>
                         </div>
                     `;
@@ -1464,22 +2670,30 @@
 
                 let spent = 0;
                 this.data.teams.forEach(t => spent += (t.budget - t.remaining));
-                document.getElementById('dashSpent').innerText = spent + "L";
+                document.getElementById('dashSpent').innerText = this.formatCr(spent);
                 document.getElementById('dashUnsold').innerText = this.data.players.filter(p => p.status === 'unsold').length;
 
                 const list = document.getElementById('dashTeamList');
                 list.innerHTML = this.data.teams.map(t => `
-                    <div class="card dash-team-card">
-                        ${t.logo ? `<img src="${t.logo}" class="dash-team-logo" alt="logo">` : '<div class="dash-team-logo" style="display:flex;align-items:center;justify-content:center;font-size:3rem;background:rgba(255,255,255,0.1);border-radius:50%;">🏏</div>'}
+                    <div class="card dash-team-card" style="background: linear-gradient(160deg, #1e293b, #020617); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.3); transform-style: preserve-3d; transition: transform 0.3s;">
+                        ${t.logo ? `<img src="${t.logo}" class="dash-team-logo" alt="logo" style="width:80px; height:80px; filter: drop-shadow(0 0 8px rgba(255,255,255,0.2));">` : '<div class="dash-team-logo" style="display:flex;align-items:center;justify-content:center;font-size:3rem;background:rgba(255,255,255,0.05);border-radius:50%;width:80px;height:80px;margin:0 auto 15px;">🏏</div>'}
                         
-                        <h4 class="dash-team-name">${t.name}</h4>
-                        <div class="progress-bar" style="width:100%; height:10px; background:rgba(255,255,255,0.1); margin-bottom:10px;">
-                            <div class="progress-fill" style="width:${((t.budget - t.remaining) / t.budget) * 100}%; background:var(--primary); box-shadow:0 0 10px var(--primary-glow);"></div>
+                        <h4 class="dash-team-name" style="font-family:'Chakra Petch', sans-serif; font-size:1.5rem; text-transform:uppercase; letter-spacing:1px; margin: 15px 0;">${t.name}</h4>
+                        
+                        <div class="progress-bar" style="width:100%; height:8px; background:rgba(255,255,255,0.1); margin-bottom:20px; border-radius:4px; overflow:hidden;">
+                            <div class="progress-fill" style="width:${((t.budget - t.remaining) / t.budget) * 100}%; height:100%; background: linear-gradient(90deg, var(--primary), var(--accent)); box-shadow:0 0 10px var(--primary-glow);"></div>
                         </div>
                         
-                        <div class="dash-stats-grid">
-                            <div><span class="dash-stat-item">Purse Left</span><span class="dash-stat-val" style="color:var(--success)">${t.remaining}L</span></div>
-                            <div><span class="dash-stat-item">Squad Size</span><span class="dash-stat-val">${t.playerCount}</span></div>
+                        <div class="dash-stats-grid" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; gap: 15px;">
+                            <div style="text-align:center;">
+                                <span class="dash-stat-item" style="font-size: 0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">Purse Left</span>
+                                <span class="dash-stat-val" style="font-family:'Chakra Petch', sans-serif; font-size: 1.6rem; color:var(--success); text-shadow:0 0 10px rgba(16,185,129,0.3);">${this.formatCr(t.remaining)}</span>
+                            </div>
+                            <div style="width:1px; background:rgba(255,255,255,0.1);"></div>
+                            <div style="text-align:center;">
+                                <span class="dash-stat-item" style="font-size: 0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">Squad</span>
+                                <span class="dash-stat-val" style="font-family:'Chakra Petch', sans-serif; font-size: 1.6rem; color:#f8fafc;">${t.playerCount}</span>
+                            </div>
                         </div>
                     </div>
                  `).join('');
@@ -1492,15 +2706,101 @@
                             ${p.img ? `<img src="${p.img}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">` : ''}
                             ${p.name}
                         </div></td>
-                        <td>${p.role}</td><td>${p.basePrice}L</td>
+                        <td>${p.role}</td><td>${this.formatCr(p.basePrice)}</td>
                         <td><span class="status-badge ${p.status === 'sold' ? 'status-sold' : ''}">${p.status}</span></td>
-                        <td>${p.soldTo || '-'}</td><td>${p.soldPrice || '-'}</td>
-                        <td><button class="btn btn-outline btn-sm" onclick="app.triggerImageUpload(${p.id})">📷 Edit Pic</button></td>
+                        <td>${p.soldTo || '-'}</td><td>${p.soldPrice ? this.formatCr(p.soldPrice) : '-'}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="app.triggerImageUpload(${p.id})" style="margin-right: 5px; margin-bottom: 5px;">📷 Edit Pic</button>
+                            ${p.status === 'pending' || p.status === 'unsold' ? `<button class="btn btn-warning btn-sm" onclick="app.openPreAssignModal(${p.id})" style="margin-bottom: 5px;">⭐ Pre-Assign</button>` : ''}
+                        </td>
                     </tr>
                 `).join('');
             },
 
-            updateUI() {/* Generic refresh if needed */ }
+            updateUI() {/* Generic refresh if needed */ },
+
+            testVoice() {
+                if (!('speechSynthesis' in window)) return alert("TTS not supported");
+
+                const voices = window.speechSynthesis.getVoices();
+                const container = document.getElementById('voiceDebugList');
+                container.style.display = 'block';
+
+                if (voices.length === 0) {
+                    container.innerText = "No voices found! (Try changing browser/system settings)";
+                    return;
+                }
+
+                container.innerHTML = voices.map(v =>
+                    `<div style="padding:2px; ${v.name.includes('India') || v.lang === 'en-IN' ? 'color:#10b981; font-weight:bold;' : 'color:#aaa;'}">
+                        ${v.name} (${v.lang})
+                    </div>`
+                ).join('');
+
+                // Test Selection Logic matches showSoldOverlay
+                let voice = voices.find(v => v.name.includes("Rishi") || v.name.includes("Ravi") || v.name.includes("Probhat") || v.name.includes("Ashok"));
+                if (!voice) voice = voices.find(v => v.name.includes("Google English India"));
+                if (!voice) voice = voices.find(v => v.lang === "en-IN");
+
+                const utt = new SpeechSynthesisUtterance("Sold! Virat Kohli to Royal Challengers for 50 Lakhs.");
+
+                if (voice) {
+                    utt.voice = voice;
+                    utt.rate = 1.0;
+                    if (!voice.name.includes("Male") && !voice.name.includes("Rishi") && !voice.name.includes("Ravi")) {
+                        utt.pitch = 0.8;
+                    }
+                    alert(`Testing Voice: ${voice.name}`);
+                } else {
+                    // Fallback
+                    const ukVoice = voices.find(v => v.lang === "en-GB");
+                    if (ukVoice) {
+                        utt.voice = ukVoice;
+                        alert(`No Indian voice found. Fallback to: ${ukVoice.name}`);
+                    } else {
+                        alert("No specific voice found. Using Browser Default.");
+                    }
+                }
+
+                // Voice test disabled per user request
+                // window.speechSynthesis.speak(utt);
+            },
+
+            renderTicker() {
+                const soldPlayers = this.data.players.filter(p => p.status === 'sold');
+                if (soldPlayers.length === 0) {
+                    document.getElementById('liveTickerContent').innerHTML = '<div class="ticker-item">Auction Live! Waiting for first sale...</div>';
+                    return;
+                }
+
+                // Show last 10-15 sold players
+                const recentSold = soldPlayers.slice(-15).reverse();
+
+                const html = recentSold.map(p => `
+                    <div class="ticker-item">
+                        <span style="color:var(--text-muted)">SOLD:</span> 
+                        <strong style="color:white; font-size:1.2rem;">${p.name}</strong> 
+                        to 
+                        <strong style="color:var(--accent);">${p.soldTo}</strong> 
+                        for 
+                        <span style="color:var(--success); font-weight:900;">₹${this.formatCr(p.soldPrice)}</span>
+                    </div>
+                `).join('<span style="color:var(--border); margin:0 10px;">|</span>');
+
+                document.getElementById('liveTickerContent').innerHTML = html;
+            },
+
+            renderPurseTable() {
+                const tbody = document.getElementById('bottomPurseTableBody');
+                if (!tbody) return;
+                tbody.innerHTML = this.data.teams.map(t => `
+                    <tr>
+                        <td style="font-weight:bold; color:var(--text-main);">${t.name}</td>
+                        <td style="font-family:'Chakra Petch'; color:var(--success); font-weight:bold; font-size:1.1rem;">${this.formatCr(t.remaining)}</td>
+                        <td style="color:var(--text-muted);">${t.playerCount}</td>
+                    </tr>
+                `).join('');
+            }
         };
 
         window.addEventListener('DOMContentLoaded', () => app.init());
