@@ -1640,6 +1640,21 @@
         </div>
     </div>
 
+    <!-- ADMIN PIN OVERLAY -->
+    <div id="adminPinModal" class="modal-overlay">
+        <div class="modal-content" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; color: var(--text-main); text-align: left; max-width: 400px; padding: 30px;">
+            <h2 style="font-size: 1.8rem; margin-bottom: 20px; font-family: 'Chakra Petch', sans-serif;"><span style="color:var(--warning);">🔒</span> Admin Unlock</h2>
+            <div class="form-group">
+                <label class="form-label">Enter Security PIN</label>
+                <input type="password" id="adminPinInput" class="form-control" placeholder="****" style="letter-spacing: 5px; font-size: 1.5rem; text-align: center;" onkeypress="if(event.key === 'Enter') app.submitAdminPin()">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button class="btn btn-warning btn-block" style="font-weight:bold;" onclick="app.submitAdminPin()">Unlock System</button>
+                <button class="btn btn-outline btn-block" onclick="document.getElementById('adminPinModal').style.display='none'">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SOLD OVERLAY -->
     <div id="modalOverlay" class="modal-overlay">
         <div class="modal-content">
@@ -1776,14 +1791,22 @@
                     this.isAdmin = false;
                     this.checkAdminUI();
                 } else {
-                    // Unlock it
-                    const pin = prompt("Enter Admin PIN to Unlock:");
-                    if (pin === "1111") {
-                        this.isAdmin = true;
-                        this.checkAdminUI();
-                    } else if (pin !== null) {
-                        alert("Wrong PIN!");
-                    }
+                    // Show Custom Modal for Masked Password
+                    document.getElementById('adminPinInput').value = '';
+                    document.getElementById('adminPinModal').style.display = 'flex';
+                    setTimeout(() => document.getElementById('adminPinInput').focus(), 100);
+                }
+            },
+
+            submitAdminPin() {
+                const pin = document.getElementById('adminPinInput').value;
+                if (pin === "1111") {
+                    this.isAdmin = true;
+                    this.checkAdminUI();
+                    document.getElementById('adminPinModal').style.display = 'none';
+                } else {
+                    alert("⚠️ Access Denied! Incorrect PIN.");
+                    document.getElementById('adminPinInput').value = '';
                 }
             },
 
